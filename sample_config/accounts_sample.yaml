@@ -1,0 +1,9 @@
+# config.yaml file
+
+# used for auto trading on robinhood
+robinhood_username: your_name@your_email.com
+robinhood_password: your_password
+
+# used to send email notification
+gmail_username: your_name@gmail.com
+gmail_password: your_password

@@ -1,0 +1,14 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+.vscode/
+
+backtest/
+accounts.yaml
+
+# virtualenv
+pyvenv.cfg
+Lib/
+Scripts/
+
+# Logs
+logs/

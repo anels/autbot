@@ -1,0 +1,33 @@
+# config.yaml file
+enable_robinhood: false # true or false
+refresh: 150
+interval: 5m
+
+Tester:
+  # - youremail1@gmail.com
+  # - youremail2@gmail.com
+
+strategy: kagi
+
+strategy_params:
+  - 0.001
+  - 1
+
+status_file: "logs/sim/status.json"
+history_file: "logs/sim/history.txt"
+log_file: "logs/sim/log.log"
+
+Watchlist:
+  - TQQQ
+  - FNGU
+  - SPY
+  - QYLD
+  - ARKW
+  - WCLD
+  - NIO
+  - SHLL
+  - AAPL
+  - MSFT
+  - AMD
+  - INTC
+  - ZM
