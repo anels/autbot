@@ -12,7 +12,7 @@ def update_trade_history(symbol, operation, amount, price, file_name):
 
 
 def send_email(subject, message, receiver_list, sender_username, sender_password):
-    fromaddr = 'superanels@gmail.com'
+    fromaddr = sender_username
     body = "Dear trader:\n\n{}\n".format(
         datetime.now()) + message + " \n\n- R from TBot"
 
