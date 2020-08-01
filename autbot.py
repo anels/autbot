@@ -134,8 +134,8 @@ def scan(account_info='accounts.yaml', config='config_rt_bot.yaml'):
                                 ticker, transaction_num, extendedHours=True)
                             close_price = float(r_receipt["price"])
                             receipt_ex = "{}: {} {} {} {} @ {} - {}".format(r_receipt["created_at"], r_receipt["type"],
-                                                                          r_receipt["side"], r_receipt["quantity"],
-                                                                          ticker, r_receipt["price"], r_receipt["state"])
+                                                                            r_receipt["side"], r_receipt["quantity"],
+                                                                            ticker, r_receipt["price"], r_receipt["state"])
 
                         status_list[ticker]['balance_cash'] += transaction_num * close_price
                         status_list[ticker]['holding_num'] = 0
@@ -143,7 +143,7 @@ def scan(account_info='accounts.yaml', config='config_rt_bot.yaml'):
                         playsound('resources/coin.mp3')
 
                     transcation_record = "{} {} {} @ {}".format(sign.upper(), transaction_num,
-                                                              ticker, close_price)
+                                                                ticker, close_price)
                     logging.info(transcation_record)
                     if enable_robinhood:
                         logging.info("Robinhood Receipt: {}".format(r_receipt))

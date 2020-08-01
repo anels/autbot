@@ -1,7 +1,10 @@
 # Byte-compiled / optimized / DLL files
 __pycache__/
 .vscode/
+.ipynb_checkpoints/
 
+
+# Test and config
 backtest/
 accounts.yaml
 

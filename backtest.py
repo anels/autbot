@@ -1,5 +1,8 @@
+import time
+import matplotlib.pyplot as plt
 import numpy as np
 import math
+from data_preparation import *
 
 
 def buy_sell(df, sell_or_buy):
@@ -36,7 +39,6 @@ def test(init_balance, df, strategy, output='oneline', verbose=False):
     df['Sell_Signal_price'] = a[1]
 
     trade_history = []
-
     curr_trade = {}
 
     for i in range(0, len(df)):
@@ -146,3 +148,95 @@ def buy_n_hold(init_balance, df, output="oneline"):
             init_balance - cost + last_price*purchase, final_Profit))
 
     return final_Profit
+
+    # print("Asset: {} + {}@{} = {} (Profit:{}%)".format(
+    #     init_balance - cost,
+    #     purchase,
+    #     last_price,
+    #     init_balance - cost + last_price*purchase,
+    #     float((last_price*purchase - cost)/init_balance*100)))
+
+
+def plot_heatmap(test_result, title, x_label, y_label):
+    fig, ax = plt.subplots(figsize=(9, 9))
+    im = ax.imshow(test_result, cmap='RdYlGn')
+
+    # We want to show all ticks...
+    ax.set_yticks(np.arange(len(x_label)))
+    ax.set_xticks(np.arange(len(y_label)))
+    # ... and label them with the respective list entries
+    ax.set_yticklabels(x_label)
+    ax.set_xticklabels(y_label)
+
+    # Rotate the tick labels and set their alignment.
+    plt.setp(ax.get_xticklabels(), rotation=45, ha="right",
+             rotation_mode="anchor")
+
+    # Loop over data dimensions and create text annotations.
+    for i in range(len(x_label)):
+        for j in range(len(y_label)):
+            text = ax.text(j, i, "{0:.2f}%".format(test_result[i][j]),
+                           ha="center", va="center", color="w")
+
+    ax.set_title(title)
+    fig.tight_layout()
+    plt.show()
+
+
+def run_benchmark(tickers, param_a, param_b, period, interval, strategy):
+    init_balance = 10000
+
+    profit_results = []
+    winrate_results = []
+    beat_results = []
+    for ticker in tickers:
+        print("Running Test for {}".format(ticker))
+        df, last_update = refresh(ticker, period, interval)
+        bnh = buy_n_hold(init_balance, df, output="None")
+
+        p_result = []
+        w_result = []
+        b_result = []
+
+        for i in param_a:
+            p_result_i = []
+            w_result_i = []
+            b_result_i = []
+            for j in param_b:
+                df_test = strategy.prep_data(df, i, j)
+                #print ("{},{} => ".format(i, j), end='')
+                test_result = test(init_balance, df_test,
+                                   strategy.sell_or_buy, output='None')
+                p_result_i.append(test_result[0] - bnh)
+                w_result_i.append(test_result[1])
+                b_result_i.append(1 if test_result[0] - bnh > 0 else 0)
+            p_result.append(p_result_i)
+            w_result.append(w_result_i)
+            b_result.append(b_result_i)
+        profit_results.append(p_result)
+        winrate_results.append(w_result)
+        beat_results.append(b_result)
+    return (profit_results, winrate_results, beat_results)
+
+
+def run_strategy(tickers, param_a, param_b, period, interval, strategy):
+    t = time.process_time()
+    (p_results, w_results, b_results) = run_benchmark(
+        tickers, param_a, param_b, period, interval, strategy)
+    elapsed_time = time.process_time() - t
+
+    print("Total Running Time: {} second.".format(elapsed_time))
+
+    total_p = np.zeros_like(p_results[0])
+    total_b = np.zeros_like(b_results[0])
+    total_w = np.zeros_like(w_results[0])
+    for i in range(len(tickers)):
+        total_p = np.add(p_results[i], total_p)
+        total_b = np.add(b_results[i], total_b)
+        total_w = np.add(w_results[i], total_w)
+    avg_b = total_b * 100.0 / len(tickers)
+    avg_w = total_w / len(tickers)
+
+    plot_heatmap(total_p, "Profit", param_a, param_b)
+    plot_heatmap(avg_b, "Beat %", param_a, param_b)
+    plot_heatmap(avg_w, "Win %", param_a, param_b)
