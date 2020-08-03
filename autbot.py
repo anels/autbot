@@ -31,15 +31,23 @@ def scan(account_info='accounts.yaml', config='config_rt_bot.yaml'):
     toaddr = config['Tester']
     ticker_list = config['Watchlist']
     refresh_interval = config['refresh']
+	
     status_file = config['status_file']
+    os.makedirs(os.path.dirname(status_file), exist_ok=True)
+
     history_file = config['history_file']
+    os.makedirs(os.path.dirname(history_file), exist_ok=True)
+
     log_file = config['log_file']
+    os.makedirs(os.path.dirname(log_file), exist_ok=True)
 
     strategy_name = config['strategy']
     strategy_params = config['strategy_params']
 
     if strategy_name == "kagi":
         from strategy import strategy_kagi as strategy
+	elif strategy_name == "wma":
+        from strategy import strategy_wma as strategy
 
     logging.basicConfig(filename=log_file,
                         level=logging.INFO,
@@ -163,7 +171,7 @@ def scan(account_info='accounts.yaml', config='config_rt_bot.yaml'):
                         ticker, sign, transaction_num, close_price, history_file)
 
                     with open(status_file, "w", encoding='utf8') as f:
-                        json.dump(status_list, f,  indent=6)
+                        json.dump(status_list, f, indent=6)
 
                 else:
                     hold_list.append(ticker)
