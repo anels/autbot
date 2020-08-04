@@ -27,11 +27,16 @@ def scan(account_info='accounts.yaml', config='config_rt_bot.yaml'):
     with open(config, 'r') as file:
         config = yaml.load(file, Loader=yaml.FullLoader)
 
-    enable_robinhood = config['enable_robinhood']
-    toaddr = config['Tester']
-    ticker_list = config['Watchlist']
     refresh_interval = config['refresh']
-	
+
+    toaddr = config['email_receivers']
+    email_prefix = config['email_prefix']
+
+    init_balance = config['init_balance']
+    enable_robinhood = config['enable_robinhood']
+
+    ticker_list = config['Watchlist']
+
     status_file = config['status_file']
     os.makedirs(os.path.dirname(status_file), exist_ok=True)
 
@@ -46,7 +51,7 @@ def scan(account_info='accounts.yaml', config='config_rt_bot.yaml'):
 
     if strategy_name == "kagi":
         from strategy import strategy_kagi as strategy
-	elif strategy_name == "wma":
+    elif strategy_name == "wma":
         from strategy import strategy_wma as strategy
 
     logging.basicConfig(filename=log_file,
@@ -58,8 +63,6 @@ def scan(account_info='accounts.yaml', config='config_rt_bot.yaml'):
     if enable_robinhood:
         login = r.login(robinhood_username, robinhood_password)
         logging.info("Robinhood Login: \n{}".format(login))
-
-    init_balance = 200
 
     if not os.path.exists(status_file):
         print("Status file does not exist!")
@@ -92,6 +95,10 @@ def scan(account_info='accounts.yaml', config='config_rt_bot.yaml'):
             time.sleep(delta.seconds)
         else:
             hold_list = []
+            trade_list = []
+            info_str = ""
+            receipt_str = ""
+
             for ticker in ticker_list:
                 if ticker not in status_list:
                     status_list[ticker] = {
@@ -106,6 +113,7 @@ def scan(account_info='accounts.yaml', config='config_rt_bot.yaml'):
                     df, len(df)-1, status_list[ticker]['status'])
 
                 if sign != 'hold':
+                    trade_list.append(ticker)
                     transaction_num = 0
 
                     if sign == 'buy':
@@ -153,19 +161,11 @@ def scan(account_info='accounts.yaml', config='config_rt_bot.yaml'):
                     transcation_record = "{} {} {} @ {}".format(sign.upper(), transaction_num,
                                                                 ticker, close_price)
                     logging.info(transcation_record)
-                    if enable_robinhood:
-                        logging.info("Robinhood Receipt: {}".format(r_receipt))
+                    info_str += "{}!\n".format(transcation_record)
 
-                    if (toaddr != None and len(toaddr) > 0):
-                        subject = "[AuTBot] {}!".format(transcation_record)
-                        if enable_robinhood:
-                            info = "[AuTBot] {}!\n\nRobinhood Receipt:\n{}".format(
-                                transcation_record, receipt_ex)
-                        else:
-                            info = "[AuTBot] {}!\n".format(
-                                transcation_record)
-                        send_email(subject, info, toaddr,
-                                   email_sender_username, email_sender_password)
+                    if enable_robinhood:
+                        receipt_str += "{}\n".format(receipt_ex)
+                        logging.info("Robinhood Receipt: {}".format(r_receipt))
 
                     update_trade_history(
                         ticker, sign, transaction_num, close_price, history_file)
@@ -179,6 +179,15 @@ def scan(account_info='accounts.yaml', config='config_rt_bot.yaml'):
             if len(hold_list) > 0:
                 hold_list_str = ", ".join(hold_list)
                 print("  hold: {}".format(hold_list_str))
+
+            if len(trade_list) > 0:
+                trade_list_str = "/".join(trade_list)
+                title = "Trade Reminder for {}!".format(trade_list_str) if len(
+                    trade_list) > 1 else "{}!".format(email_prefix, info_str)
+                body = "{}!\n\nRobinhood Receipt:\n{}".format(
+                    info_str, receipt_str) if enable_robinhood else "{}!".format(info_str)
+                send_email("[AuTBot][{}]{}".format(email_prefix, title),
+                           body, toaddr, email_sender_username, email_sender_password)
 
             time.sleep(refresh_interval)
 
