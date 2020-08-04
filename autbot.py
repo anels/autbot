@@ -2,11 +2,11 @@ import getopt
 import time
 import os
 import logging
-import pandas as pd
 import yaml
 import json
 import math
 import sys
+import pandas as pd
 import robin_stocks as r
 from datetime import datetime, timedelta
 from playsound import playsound
@@ -19,40 +19,28 @@ def scan(account_info='accounts.yaml', config='config_rt_bot.yaml'):
     with open(account_info, 'r') as file:
         accounts = yaml.load(file, Loader=yaml.FullLoader)
 
+    with open(config, 'r') as file:
+        config = yaml.load(file, Loader=yaml.FullLoader)
+
     robinhood_username = accounts['robinhood_username']
     robinhood_password = accounts['robinhood_password']
     email_sender_username = accounts['gmail_username']
     email_sender_password = accounts['gmail_password']
-
-    with open(config, 'r') as file:
-        config = yaml.load(file, Loader=yaml.FullLoader)
-
+    status_file = config['status_file']
+    history_file = config['history_file']
+    log_file = config['log_file']
     refresh_interval = config['refresh']
-
     toaddr = config['email_receivers']
     email_prefix = config['email_prefix']
-
     init_balance = config['init_balance']
     enable_robinhood = config['enable_robinhood']
-
-    ticker_list = config['Watchlist']
-
-    status_file = config['status_file']
-    os.makedirs(os.path.dirname(status_file), exist_ok=True)
-
-    history_file = config['history_file']
-    os.makedirs(os.path.dirname(history_file), exist_ok=True)
-
-    log_file = config['log_file']
-    os.makedirs(os.path.dirname(log_file), exist_ok=True)
-
+    ticker_list = config['watch_list']
     strategy_name = config['strategy']
     strategy_params = config['strategy_params']
 
-    if strategy_name == "kagi":
-        from strategy import strategy_kagi as strategy
-    elif strategy_name == "wma":
-        from strategy import strategy_wma as strategy
+    os.makedirs(os.path.dirname(status_file), exist_ok=True)
+    os.makedirs(os.path.dirname(history_file), exist_ok=True)
+    os.makedirs(os.path.dirname(log_file), exist_ok=True)
 
     logging.basicConfig(filename=log_file,
                         level=logging.INFO,
@@ -63,6 +51,11 @@ def scan(account_info='accounts.yaml', config='config_rt_bot.yaml'):
     if enable_robinhood:
         login = r.login(robinhood_username, robinhood_password)
         logging.info("Robinhood Login: \n{}".format(login))
+
+    if strategy_name == "kagi":
+        from strategy import strategy_kagi as strategy
+    elif strategy_name == "wma":
+        from strategy import strategy_wma as strategy
 
     if not os.path.exists(status_file):
         print("Status file does not exist!")
@@ -176,10 +169,6 @@ def scan(account_info='accounts.yaml', config='config_rt_bot.yaml'):
                 else:
                     hold_list.append(ticker)
 
-            if len(hold_list) > 0:
-                hold_list_str = ", ".join(hold_list)
-                print("  hold: {}".format(hold_list_str))
-
             if len(trade_list) > 0:
                 trade_list_str = "/".join(trade_list)
                 title = "Trade Reminder for {}!".format(trade_list_str) if len(
@@ -188,6 +177,11 @@ def scan(account_info='accounts.yaml', config='config_rt_bot.yaml'):
                     info_str, receipt_str) if enable_robinhood else "{}!".format(info_str)
                 send_email("[AuTBot][{}]{}".format(email_prefix, title),
                            body, toaddr, email_sender_username, email_sender_password)
+
+            if len(hold_list) > 0:
+                hold_list_str = ", ".join(hold_list)
+                print("  hold: {}".format(hold_list_str))
+
 
             time.sleep(refresh_interval)
 

@@ -11,11 +11,11 @@ strategy_params:
   - 34
 
 # email notification
+email_prefix: Test_01
 email_receivers:
   # - youremail1@gmail.com
   # - youremail2@gmail.com
 # add to the email subject to dinstinghish different config (if you want to test multiple strategy or parameters)
-email_prefix: Test_01
 
 # real time simulation/trade
 init_balance: 1000
@@ -29,17 +29,14 @@ history_file: "logs/history.txt"
 log_file: "logs/log.log"
 
 # watch list
-Watchlist:
+watch_list:
   - TQQQ
   - FNGU
   - SPY
   - QYLD
   - ARKW
   - WCLD
-  - NIO
-  - SHLL
   - AAPL
   - MSFT
   - AMD
   - INTC
-  - ZM
