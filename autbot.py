@@ -96,7 +96,7 @@ def scan(account_info='accounts.yaml', config='config_rt_bot.yaml'):
                 if ticker not in status_list:
                     status_list[ticker] = {
                         'status': 0, 'balance_cash': init_balance, 'holding_num': 0}
-                df, new_time = refresh(ticker, period="7d",
+                df, new_time = refresh(ticker, period="5d",
                                        interval=config['interval'])
                 close_price = df.iloc[-1]['close']
 
@@ -158,7 +158,7 @@ def scan(account_info='accounts.yaml', config='config_rt_bot.yaml'):
 
                     if enable_robinhood:
                         receipt_str += "{}\n".format(receipt_ex)
-                        logging.info("Robinhood Receipt: {}".format(r_receipt))
+                        logging.info("Robinhood Receipt: {}".format(receipt_ex))
 
                     update_trade_history(
                         ticker, sign, transaction_num, close_price, history_file)
@@ -172,15 +172,15 @@ def scan(account_info='accounts.yaml', config='config_rt_bot.yaml'):
             if len(trade_list) > 0:
                 trade_list_str = "/".join(trade_list)
                 title = "Trade Reminder for {}!".format(trade_list_str) if len(
-                    trade_list) > 1 else "{}!".format(email_prefix, info_str)
-                body = "{}!\n\nRobinhood Receipt:\n{}".format(
-                    info_str, receipt_str) if enable_robinhood else "{}!".format(info_str)
+                    trade_list) > 1 else "{}!".format(info_str)
+                body_text = "{}\n\nRobinhood Receipt:\n{}".format(
+                    info_str, receipt_str) if enable_robinhood else "{}".format(info_str)
                 send_email("[AuTBot][{}]{}".format(email_prefix, title),
-                           body, toaddr, email_sender_username, email_sender_password)
+                           body_text, toaddr, email_sender_username, email_sender_password)
 
             if len(hold_list) > 0:
                 hold_list_str = ", ".join(hold_list)
-                print("  hold: {}".format(hold_list_str))
+                print("HOLD: {}".format(hold_list_str))
 
 
             time.sleep(refresh_interval)

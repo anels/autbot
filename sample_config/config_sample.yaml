@@ -1,6 +1,6 @@
 # config.yaml file
 
-# data retrival
+# data retrieval
 refresh: 150
 interval: 5m
 
@@ -15,7 +15,7 @@ email_prefix: Test_01
 email_receivers:
   # - youremail1@gmail.com
   # - youremail2@gmail.com
-# add to the email subject to dinstinghish different config (if you want to test multiple strategy or parameters)
+# add to the email subject to distinguish different config (if you want to test multiple strategy or parameters)
 
 # real time simulation/trade
 init_balance: 1000
@@ -30,12 +30,7 @@ log_file: "logs/log.log"
 
 # watch list
 watch_list:
-  - TQQQ
-  - FNGU
   - SPY
-  - QYLD
-  - ARKW
-  - WCLD
   - AAPL
   - MSFT
   - AMD
