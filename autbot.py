@@ -71,6 +71,10 @@ def scan(account_info='accounts.yaml', config='config_rt_bot.yaml'):
     with open(status_file, 'rb') as infile:
         status_list = json.load(infile)
 
+    for ticker in ticker_list:
+        if ticker not in status_list:
+            status_list[ticker] = {'status': 0, 'balance_cash': init_balance, 'holding_num': 0}
+
     while True:
         now = datetime.now()
         print(now)
@@ -93,10 +97,7 @@ def scan(account_info='accounts.yaml', config='config_rt_bot.yaml'):
             receipt_str = ""
 
             for ticker in ticker_list:
-                if ticker not in status_list:
-                    status_list[ticker] = {
-                        'status': 0, 'balance_cash': init_balance, 'holding_num': 0}
-                df, new_time = refresh(ticker, period="5d",
+                df, _ = refresh(ticker, period="5d",
                                        interval=config['interval'])
                 close_price = df.iloc[-1]['close']
 
@@ -163,11 +164,11 @@ def scan(account_info='accounts.yaml', config='config_rt_bot.yaml'):
                     update_trade_history(
                         ticker, sign, transaction_num, close_price, history_file)
 
-                    with open(status_file, "w", encoding='utf8') as f:
-                        json.dump(status_list, f, indent=6)
-
                 else:
                     hold_list.append(ticker)
+
+            with open(status_file, "w", encoding='utf8') as f:
+                json.dump(status_list, f, indent=6)
 
             if len(trade_list) > 0:
                 trade_list_str = "/".join(trade_list)
