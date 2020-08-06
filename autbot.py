@@ -14,6 +14,15 @@ from data_preparation import *
 from misc import *
 
 
+def format_robinhood_trade_receipt(r_receipt):
+    return "{}: {} {} {} {} @ {} - {}".format(r_receipt["created_at"],
+                                              r_receipt["type"],
+                                              r_receipt["side"],
+                                              r_receipt["quantity"],
+                                              r_receipt["symbol"],
+                                              r_receipt["price"],
+                                              r_receipt["state"])
+
 def scan(account_info='accounts.yaml', config='config_rt_bot.yaml'):
 
     with open(account_info, 'r') as file:
@@ -50,7 +59,7 @@ def scan(account_info='accounts.yaml', config='config_rt_bot.yaml'):
 
     if enable_robinhood:
         login = r.login(robinhood_username, robinhood_password)
-        logging.info("Robinhood Login: \n{}".format(login))
+        logging.info("Robinhood Login: {}, the token will be expired in {} seconds.".format(login['detail'], login['expires_in']))
 
     if strategy_name == "kagi":
         from strategy import strategy_kagi as strategy
@@ -124,9 +133,7 @@ def scan(account_info='accounts.yaml', config='config_rt_bot.yaml'):
                                 r_receipt = r.order_buy_market(
                                     ticker, transaction_num, extendedHours=True)
                                 close_price = float(r_receipt["price"])
-                                receipt_ex = "{}: {} {} {} {}@{} - {}".format(r_receipt["created_at"], r_receipt["type"],
-                                                                              r_receipt["side"], r_receipt["quantity"],
-                                                                              ticker, r_receipt["price"], r_receipt["state"])
+                                receipt_ex = format_robinhood_trade_receipt(r_receipt)
                             else:
                                 logging.info(
                                     "Insufficient Cash! - {}".format(cash))
@@ -143,9 +150,7 @@ def scan(account_info='accounts.yaml', config='config_rt_bot.yaml'):
                             r_receipt = r.order_sell_market(
                                 ticker, transaction_num, extendedHours=True)
                             close_price = float(r_receipt["price"])
-                            receipt_ex = "{}: {} {} {} {} @ {} - {}".format(r_receipt["created_at"], r_receipt["type"],
-                                                                            r_receipt["side"], r_receipt["quantity"],
-                                                                            ticker, r_receipt["price"], r_receipt["state"])
+                            receipt_ex = format_robinhood_trade_receipt(r_receipt)
 
                         status_list[ticker]['balance_cash'] += transaction_num * close_price
                         status_list[ticker]['holding_num'] = 0
@@ -172,11 +177,11 @@ def scan(account_info='accounts.yaml', config='config_rt_bot.yaml'):
 
             if len(trade_list) > 0:
                 trade_list_str = "/".join(trade_list)
-                title = "Trade Reminder for {}!".format(trade_list_str) if len(
+                title = "Trade Notification for {}!".format(trade_list_str) if len(
                     trade_list) > 1 else "{}!".format(info_str)
                 body_text = "{}\n\nRobinhood Receipt:\n{}".format(
                     info_str, receipt_str) if enable_robinhood else "{}".format(info_str)
-                send_email("[AuTBot][{}]{}".format(email_prefix, title),
+                send_email("[AuTBot][{}] {}".format(email_prefix, title),
                            body_text, toaddr, email_sender_username, email_sender_password)
 
             if len(hold_list) > 0:

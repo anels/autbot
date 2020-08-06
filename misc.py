@@ -20,7 +20,7 @@ def send_email(subject, message, receiver_list, sender_username, sender_password
     cc = []
     bcc = []
 
-    msg = MIMEText(body, 'html', _charset='utf-8')
+    msg = MIMEText(body, _charset='utf-8')
     msg['From'] = fromaddr
     msg['To'] = ', '.join(toaddr)
     msg['Cc'] = ', '.join(cc)
