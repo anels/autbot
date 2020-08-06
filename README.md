@@ -30,6 +30,14 @@ Copy two files in the `sample_config` folder and modify them according to your n
 autbot.py -a <account_info_file> -c <config_file>
 ```
 
+or 
+
+```
+main_runner.py "autbot.py -a <account_info_file> -c <config_file>"
+```
+
+`main_runner.py` will auto-restart your bot if it stops.
+
 ## Test & Benchmark Strategies
 
 Start jupyter notebook and run `strategy_benchmark`.
