@@ -23,6 +23,7 @@ def format_robinhood_trade_receipt(r_receipt):
                                               r_receipt["price"],
                                               r_receipt["state"])
 
+
 def scan(account_info='accounts.yaml', config='config_rt_bot.yaml'):
 
     with open(account_info, 'r') as file:
@@ -59,7 +60,8 @@ def scan(account_info='accounts.yaml', config='config_rt_bot.yaml'):
 
     if enable_robinhood:
         login = r.login(robinhood_username, robinhood_password)
-        logging.info("Robinhood Login: {}, the token will be expired in {} seconds.".format(login['detail'], login['expires_in']))
+        logging.info("Robinhood Login: {}, the token will be expired in {} seconds.".format(
+            login['detail'], login['expires_in']))
 
     if strategy_name == "kagi":
         from strategy import strategy_kagi as strategy
@@ -82,7 +84,8 @@ def scan(account_info='accounts.yaml', config='config_rt_bot.yaml'):
 
     for ticker in ticker_list:
         if ticker not in status_list:
-            status_list[ticker] = {'status': 0, 'balance_cash': init_balance, 'holding_num': 0}
+            status_list[ticker] = {
+                'status': 0, 'balance_cash': init_balance, 'holding_num': 0}
 
     while True:
         now = datetime.now()
@@ -107,7 +110,7 @@ def scan(account_info='accounts.yaml', config='config_rt_bot.yaml'):
 
             for ticker in ticker_list:
                 df, _ = refresh(ticker, period="5d",
-                                       interval=config['interval'])
+                                interval=config['interval'])
                 close_price = df.iloc[-1]['close']
 
                 df = strategy.prep_data(
@@ -133,7 +136,8 @@ def scan(account_info='accounts.yaml', config='config_rt_bot.yaml'):
                                 r_receipt = r.order_buy_market(
                                     ticker, transaction_num, extendedHours=True)
                                 close_price = float(r_receipt["price"])
-                                receipt_ex = format_robinhood_trade_receipt(r_receipt)
+                                receipt_ex = format_robinhood_trade_receipt(
+                                    r_receipt)
                             else:
                                 logging.info(
                                     "Insufficient Cash! - {}".format(cash))
@@ -150,7 +154,8 @@ def scan(account_info='accounts.yaml', config='config_rt_bot.yaml'):
                             r_receipt = r.order_sell_market(
                                 ticker, transaction_num, extendedHours=True)
                             close_price = float(r_receipt["price"])
-                            receipt_ex = format_robinhood_trade_receipt(r_receipt)
+                            receipt_ex = format_robinhood_trade_receipt(
+                                r_receipt)
 
                         status_list[ticker]['balance_cash'] += transaction_num * close_price
                         status_list[ticker]['holding_num'] = 0
@@ -164,7 +169,8 @@ def scan(account_info='accounts.yaml', config='config_rt_bot.yaml'):
 
                     if enable_robinhood:
                         receipt_str += "{}\n".format(receipt_ex)
-                        logging.info("Robinhood Receipt: {}".format(receipt_ex))
+                        logging.info(
+                            "Robinhood Receipt: {}".format(receipt_ex))
 
                     update_trade_history(
                         ticker, sign, transaction_num, close_price, history_file)
@@ -187,7 +193,6 @@ def scan(account_info='accounts.yaml', config='config_rt_bot.yaml'):
             if len(hold_list) > 0:
                 hold_list_str = ", ".join(hold_list)
                 print("HOLD: {}".format(hold_list_str))
-
 
             time.sleep(refresh_interval)
 

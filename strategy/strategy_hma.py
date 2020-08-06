@@ -9,6 +9,7 @@ def prep_data(df, fast_period=12, slow_period=24):
     df['hma_slow'] = TA.HMA(df, slow_period)
     return df
 
+
 def buy_signal_hma(df, i):
     if i == 0:
         return False
@@ -25,7 +26,6 @@ def sell_signal_hma(df, i):
         return True
     else:
         return False
-
 
 
 def sell_or_buy(df, i, status):
@@ -45,13 +45,11 @@ def plot(df, sim=False):
     if sim:
         buy, sell = buy_sell(df, sell_or_buy)
         plt.scatter(df.index, buy,
-                color='green', label='buy', marker='^', alpha=1)
-        plt.scatter(df.index,sell,
-            color='red', label='sell', marker='v', alpha=1)
+                    color='green', label='buy', marker='^', alpha=1)
+        plt.scatter(df.index, sell,
+                    color='red', label='sell', marker='v', alpha=1)
     plt.title('HMA Strategy')
     plt.xlabel('Time')
     plt.xticks(rotation=45)
     plt.ylabel('Price')
     plt.legend(loc='upper left')
-
-

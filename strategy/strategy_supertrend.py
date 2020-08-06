@@ -4,7 +4,7 @@ from finta import TA
 from backtest import *
 
 
-def prep_data(df, multiplier=3, atr_period  = 50):
+def prep_data(df, multiplier=3, atr_period=50):
     df['atr'] = TA.ATR(df, atr_period)
     df['up'] = df['open'] - (multiplier * df['atr'])
     df['up2'] = df['up'].bfill()
@@ -15,6 +15,7 @@ def prep_data(df, multiplier=3, atr_period  = 50):
     df['trend'] = get_trend(df)
 
     return df
+
 
 def s_up(df):
     s_up = []
@@ -72,10 +73,6 @@ def sell_signal_st(df, i):
         return False
 
 
-
-
-
-
 def plot(df, sim=False):
     plt.figure(figsize=(16, 4.5))
     plt.plot(df['s_up'], label='Lowerbound', alpha=0.35)
@@ -84,9 +81,9 @@ def plot(df, sim=False):
     if sim:
         buy, sell = buy_sell(df, sell_or_buy)
         plt.scatter(df.index, buy,
-                color='green', label='buy', marker='^', alpha=1)
-        plt.scatter(df.index,sell,
-            color='red', label='sell', marker='v', alpha=1)
+                    color='green', label='buy', marker='^', alpha=1)
+        plt.scatter(df.index, sell,
+                    color='red', label='sell', marker='v', alpha=1)
     plt.title('SuperTrend Strategy')
     plt.xticks(rotation=45)
     plt.ylabel('Price')

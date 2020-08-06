@@ -3,12 +3,14 @@ from finta import TA
 import matplotlib.pyplot as plt
 from backtest import *
 
+
 def prep_data(df, wma_period=13, ema_period=13):
     wma_period = int(wma_period)
     ema_period = int(ema_period)
     df['wma'] = TA.WMA(df, wma_period, 'close')
     df['ema'] = TA.EMA(df, ema_period, 'close')
     return df
+
 
 def buy_signal_wma(df, i):
     if i == 0:
@@ -18,6 +20,7 @@ def buy_signal_wma(df, i):
     else:
         return False
 
+
 def sell_signal_wma(df, i):
     if i == 0:
         return False
@@ -25,6 +28,7 @@ def sell_signal_wma(df, i):
         return True
     else:
         return False
+
 
 def sell_or_buy(df, i, status):
     if status == 0 and buy_signal_wma(df, i):
