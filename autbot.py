@@ -107,10 +107,12 @@ def scan(account_info='accounts.yaml', config='config_rt_bot.yaml'):
             trade_list = []
             info_str = ""
             receipt_str = ""
+            
+            dfs, _ = mass_refresh(ticker_list, period='5d',
+                                  interval=config['interval'])
 
             for ticker in ticker_list:
-                df, _ = refresh(ticker, period="5d",
-                                interval=config['interval'])
+                df = dfs[ticker]
                 close_price = df.iloc[-1]['close']
 
                 df = strategy.prep_data(
