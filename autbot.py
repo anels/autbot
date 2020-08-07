@@ -14,12 +14,12 @@ from data_preparation import *
 from misc import *
 
 
-def format_robinhood_trade_receipt(r_receipt):
+def format_robinhood_trade_receipt(ticker, r_receipt):
     return "{}: {} {} {} {} @ {} - {}".format(r_receipt["created_at"],
                                               r_receipt["type"],
                                               r_receipt["side"],
                                               r_receipt["quantity"],
-                                              r_receipt["symbol"],
+                                              ticker,
                                               r_receipt["price"],
                                               r_receipt["state"])
 
@@ -136,7 +136,7 @@ def scan(account_info='accounts.yaml', config='config_rt_bot.yaml'):
                                 r_receipt = r.order_buy_market(
                                     ticker, transaction_num, extendedHours=True)
                                 close_price = float(r_receipt["price"])
-                                receipt_ex = format_robinhood_trade_receipt(
+                                receipt_ex = format_robinhood_trade_receipt(ticker, 
                                     r_receipt)
                             else:
                                 logging.info(
@@ -154,7 +154,7 @@ def scan(account_info='accounts.yaml', config='config_rt_bot.yaml'):
                             r_receipt = r.order_sell_market(
                                 ticker, transaction_num, extendedHours=True)
                             close_price = float(r_receipt["price"])
-                            receipt_ex = format_robinhood_trade_receipt(
+                            receipt_ex = format_robinhood_trade_receipt(ticker, 
                                 r_receipt)
 
                         status_list[ticker]['balance_cash'] += transaction_num * close_price

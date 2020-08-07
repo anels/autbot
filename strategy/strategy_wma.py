@@ -7,8 +7,10 @@ from backtest import *
 def prep_data(df, wma_period=13, ema_period=13):
     wma_period = int(wma_period)
     ema_period = int(ema_period)
-    df['wma'] = TA.WMA(df, wma_period, 'close')
-    df['ema'] = TA.EMA(df, ema_period, 'close')
+
+    df = df.copy()
+    df.loc[:, 'wma'] = TA.WMA(df, wma_period, 'close')
+    df.loc[:, 'ema'] = TA.EMA(df, ema_period, 'close')
     return df
 
 
