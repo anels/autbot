@@ -107,7 +107,7 @@ def scan(account_info='accounts.yaml', config='config_rt_bot.yaml'):
             trade_list = []
             info_str = ""
             receipt_str = ""
-            
+
             dfs, _ = mass_refresh(ticker_list, period='5d',
                                   interval=config['interval'])
 
@@ -138,8 +138,8 @@ def scan(account_info='accounts.yaml', config='config_rt_bot.yaml'):
                                 r_receipt = r.order_buy_market(
                                     ticker, transaction_num, extendedHours=True)
                                 close_price = float(r_receipt["price"])
-                                receipt_ex = format_robinhood_trade_receipt(ticker, 
-                                    r_receipt)
+                                receipt_ex = format_robinhood_trade_receipt(ticker,
+                                                                            r_receipt)
                             else:
                                 logging.info(
                                     "Insufficient Cash! - {}".format(cash))
@@ -156,8 +156,8 @@ def scan(account_info='accounts.yaml', config='config_rt_bot.yaml'):
                             r_receipt = r.order_sell_market(
                                 ticker, transaction_num, extendedHours=True)
                             close_price = float(r_receipt["price"])
-                            receipt_ex = format_robinhood_trade_receipt(ticker, 
-                                r_receipt)
+                            receipt_ex = format_robinhood_trade_receipt(ticker,
+                                                                        r_receipt)
 
                         status_list[ticker]['balance_cash'] += transaction_num * close_price
                         status_list[ticker]['holding_num'] = 0
@@ -189,7 +189,9 @@ def scan(account_info='accounts.yaml', config='config_rt_bot.yaml'):
                     trade_list) > 1 else "{}!".format(info_str)
                 body_text = "{}\n\nRobinhood Receipt:\n{}".format(
                     info_str, receipt_str) if enable_robinhood else "{}".format(info_str)
-                send_email("[AuTBot][{}] {}".format(email_prefix, title),
+                header = "[AuTBot][{}]".format(email_prefix) if not (
+                    email_prefix and email_prefix.strip()) else "[AuTBot]"
+                send_email("{} {}".format(header, title),
                            body_text, toaddr, email_sender_username, email_sender_password)
 
             if len(hold_list) > 0:
