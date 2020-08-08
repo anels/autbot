@@ -7,6 +7,8 @@ import matplotlib.pyplot as plt
 def prep_data(df, reversal=0.02, period=13):
     reversal = float(reversal)
     period = int(period)
+
+    df = df.copy()
     df['kagi'] = getKagi(df['close'], reversal)
     df['wma'] = TA.WMA(df, period, 'close')
     return df

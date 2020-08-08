@@ -5,6 +5,10 @@ from backtest import *
 
 
 def prep_data(df, fast_period=12, slow_period=24):
+    fast_period = int(fast_period)
+    slow_period = int(slow_period)
+
+    df = df.copy()
     df['hma_fast'] = TA.HMA(df, fast_period)
     df['hma_slow'] = TA.HMA(df, slow_period)
     return df

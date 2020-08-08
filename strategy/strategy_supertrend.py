@@ -5,6 +5,10 @@ from backtest import *
 
 
 def prep_data(df, multiplier=3, atr_period=50):
+    multiplier = float(multiplier)
+    atr_period = int(atr_period)
+
+    df = df.copy()
     df['atr'] = TA.ATR(df, atr_period)
     df['up'] = df['open'] - (multiplier * df['atr'])
     df['up2'] = df['up'].bfill()

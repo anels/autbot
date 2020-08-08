@@ -24,6 +24,24 @@ def format_robinhood_trade_receipt(ticker, r_receipt):
                                               r_receipt["state"])
 
 
+def get_strategy(strategy_name):
+    if strategy_name == "kagi":
+        from strategy import strategy_kagi as strategy
+    elif strategy_name == "wma":
+        from strategy import strategy_wma as strategy
+    elif strategy_name == "macd":
+        from strategy import strategy_macd as strategy
+    elif strategy_name == "supertrend":
+        from strategy import strategy_supertrend as strategy
+    elif strategy_name == "hma":
+        from strategy import strategy_hma as strategy
+    elif strategy_name == "rvwma":
+        from strategy import strategy_rvwma as strategy
+    else:
+        raise Exception('Strategy not found.')
+
+    return strategy
+
 def scan(account_info='accounts.yaml', config='config_rt_bot.yaml'):
 
     with open(account_info, 'r') as file:
@@ -63,10 +81,7 @@ def scan(account_info='accounts.yaml', config='config_rt_bot.yaml'):
         logging.info("Robinhood Login: {}, the token will be expired in {} seconds.".format(
             login['detail'], login['expires_in']))
 
-    if strategy_name == "kagi":
-        from strategy import strategy_kagi as strategy
-    elif strategy_name == "wma":
-        from strategy import strategy_wma as strategy
+    strategy = get_strategy(strategy_name)
 
     if not os.path.exists(status_file):
         print("Status file does not exist!")

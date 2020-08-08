@@ -13,6 +13,11 @@ def rolling_vwma(df, rolling_period):
 
 
 def prep_data(df, rvwma_period=34, wma_period=21):
+    rvwma_period = int(rvwma_period)
+    wma_period = int(wma_period)
+
+    df = df.copy()
+
     df['rvwma'] = rolling_vwma(df, rvwma_period)
     df['wma'] = TA.WMA(df, wma_period)
     return df
