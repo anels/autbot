@@ -164,7 +164,7 @@ def scan(account_info='accounts.yaml', config='config_rt_bot.yaml'):
                         status_list[ticker]['status'] = 0
                         playsound('resources/coin.mp3')
 
-                    transcation_record = "{} {} {} @ {}".format(sign.upper(), transaction_num,
+                    transcation_record = "{} {} {} @ {:.2f}".format(sign.upper(), transaction_num,
                                                                 ticker, close_price)
                     logging.info(transcation_record)
                     info_str += "{}!\n".format(transcation_record)
@@ -189,8 +189,8 @@ def scan(account_info='accounts.yaml', config='config_rt_bot.yaml'):
                     trade_list) > 1 else "{}!".format(info_str)
                 body_text = "{}\n\nRobinhood Receipt:\n{}".format(
                     info_str, receipt_str) if enable_robinhood else "{}".format(info_str)
-                header = "[AuTBot][{}]".format(email_prefix) if not (
-                    email_prefix and email_prefix.strip()) else "[AuTBot]"
+                header = "[AuTBot][{}]".format(
+                    email_prefix) if email_prefix and email_prefix.strip() else "[AuTBot]"
                 send_email("{} {}".format(header, title),
                            body_text, toaddr, email_sender_username, email_sender_password)
 
