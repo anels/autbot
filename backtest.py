@@ -54,7 +54,7 @@ def test(init_balance, df, strategy, output='oneline', verbose=False):
 
             if verbose:
                 print("{}: Buy {} @ {}, balance = {}".format(
-                    df.index[i], purchase, df['Buy_Signal_price'][i], balance))
+                    df['Time'][i], purchase, df['Buy_Signal_price'][i], balance))
         elif not math.isnan(df['Sell_Signal_price'][i]) and holdings > 0:
             balance += holdings * df['Sell_Signal_price'][i]
             curr_trade['close'] = df['Sell_Signal_price'][i]
@@ -68,7 +68,7 @@ def test(init_balance, df, strategy, output='oneline', verbose=False):
             curr_trade = {}
             if verbose:
                 print("{}: Sell {} @ {}, balance = {}".format(
-                    df.index[i], holdings, df['Sell_Signal_price'][i], balance))
+                    df['Time'][i], holdings, df['Sell_Signal_price'][i], balance))
             holdings = 0
 
     num_win = 0
