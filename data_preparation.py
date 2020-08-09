@@ -4,11 +4,12 @@ import yfinance as yf
 def refresh(ticker, period="30d", interval="15m"):
     df = yf.Ticker(ticker).history(period=period,  interval=interval)
 
+    df['Time'] = df.index
+
     df = df.dropna(subset=['High', 'Low', 'Open', 'Close', 'Volume'])
     if df.iloc[-1]['Volume'] == 0:
         df.drop(df.tail(1).index, inplace=True)
 
-    df['Time'] = df.index
     df.index = range(0, len(df))
 
     df.rename(columns={'High': 'high',
@@ -30,9 +31,10 @@ def mass_refresh(tickers, period="30d", interval="15m"):
 
     for ticker in tickers:
         df = dfs[ticker][['High', 'Low', 'Open', 'Close', 'Volume']]
-        df = df.dropna(subset=['High', 'Low', 'Open', 'Close', 'Volume'])
 
         df['Time'] = df.index
+        df = df.dropna(subset=['High', 'Low', 'Open', 'Close', 'Volume'])
+
         df.index = range(0, len(df))
 
         df.rename(columns={'High': 'high',
