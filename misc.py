@@ -7,7 +7,7 @@ import smtplib
 def update_trade_history(symbol, operation, amount, price, file_name):
     with open(file_name, 'a+') as log_file:
         current_time = str(pd.Timestamp("now"))
-        log_file.write("{}: {} {} {} @ {}\n".format(current_time,
+        log_file.write("{}: {} {} {} @ {:.2f}\n".format(current_time,
                                                     operation, amount, symbol, price))
 
 
