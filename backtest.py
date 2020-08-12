@@ -1,8 +1,8 @@
-import time
 import matplotlib.pyplot as plt
 import numpy as np
 import math
 from data_preparation import *
+from misc import timeit
 
 
 def buy_sell(df, sell_or_buy):
@@ -183,6 +183,7 @@ def plot_heatmap(test_result, title, x_label, y_label):
     plt.show()
 
 
+@timeit
 def run_benchmark(tickers, param_a, param_b, period, interval, strategy):
     init_balance = 10000
 
@@ -220,12 +221,9 @@ def run_benchmark(tickers, param_a, param_b, period, interval, strategy):
 
 
 def run_strategy(tickers, param_a, param_b, period, interval, strategy):
-    t = time.process_time()
+
     (p_results, w_results, b_results) = run_benchmark(
         tickers, param_a, param_b, period, interval, strategy)
-    elapsed_time = time.process_time() - t
-
-    print("Total Running Time: {} second.".format(elapsed_time))
 
     total_p = np.zeros_like(p_results[0])
     total_b = np.zeros_like(b_results[0])
@@ -237,6 +235,6 @@ def run_strategy(tickers, param_a, param_b, period, interval, strategy):
     avg_b = total_b * 100.0 / len(tickers)
     avg_w = total_w / len(tickers)
 
-    plot_heatmap(total_p, "Profit", param_a, param_b)
-    plot_heatmap(avg_b, "Beat %", param_a, param_b)
-    plot_heatmap(avg_w, "Win %", param_a, param_b)
+    plot_heatmap(total_p, f"Profit of {strategy.__name__}", param_a, param_b)
+    plot_heatmap(avg_b, f"Beat % of {strategy.__name__}", param_a, param_b)
+    plot_heatmap(avg_w, f"Win % of {strategy.__name__}", param_a, param_b)
