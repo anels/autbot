@@ -42,6 +42,7 @@ def get_strategy(strategy_name):
 
     return strategy
 
+
 def scan(account_info='accounts.yaml', config='config_rt_bot.yaml'):
 
     with open(account_info, 'r') as file:
@@ -113,8 +114,8 @@ def scan(account_info='accounts.yaml', config='config_rt_bot.yaml'):
             next_wake_time = next_wake_time.replace(
                 hour=6, minute=00, second=0)
             delta = next_wake_time - now
-            logging.info("Go to sleep now, will wake up at {}...".format(
-                next_wake_time))
+            logging.info(
+                f"Go to sleep now, will wake up at {next_wake_time}...")
             playsound('resources/snoring.mp3')
             time.sleep(delta.seconds)
         else:
@@ -180,14 +181,13 @@ def scan(account_info='accounts.yaml', config='config_rt_bot.yaml'):
                         playsound('resources/coin.mp3')
 
                     transcation_record = "{} {} {} @ {:.2f}".format(sign.upper(), transaction_num,
-                                                                ticker, close_price)
+                                                                    ticker, close_price)
                     logging.info(transcation_record)
                     info_str += "{}!\n".format(transcation_record)
 
                     if enable_robinhood:
-                        receipt_str += "{}\n".format(receipt_ex)
-                        logging.info(
-                            "Robinhood Receipt: {}".format(receipt_ex))
+                        receipt_str += f"{receipt_ex}\n"
+                        logging.info(f"Robinhood Receipt: {receipt_ex}")
 
                     update_trade_history(
                         ticker, sign, transaction_num, close_price, history_file)
@@ -200,14 +200,13 @@ def scan(account_info='accounts.yaml', config='config_rt_bot.yaml'):
 
             if len(trade_list) > 0:
                 trade_list_str = "/".join(trade_list)
-                title = "Trade Notification for {}!".format(trade_list_str) if len(
-                    trade_list) > 1 else "{}!".format(info_str)
-                body_text = "{}\n\nRobinhood Receipt:\n{}".format(
-                    info_str, receipt_str) if enable_robinhood else "{}".format(info_str)
-                header = "[AuTBot][{}]".format(
-                    email_prefix) if email_prefix and email_prefix.strip() else "[AuTBot]"
-                send_email("{} {}".format(header, title),
-                           body_text, toaddr, email_sender_username, email_sender_password)
+                title = f"Trade Notification for {trade_list_str}" if len(
+                    trade_list) > 1 else info_str
+                body_text = f"{info_str}\n\nRobinhood Receipt:\n{receipt_str}" if enable_robinhood else info_str
+                prefix = f"[AuTBot][{email_prefix}]" if email_prefix and email_prefix.strip(
+                ) else "[AuTBot]"
+                send_email(f"{prefix} {title}!", body_text, toaddr,
+                           email_sender_username, email_sender_password)
 
             if len(hold_list) > 0:
                 hold_list_str = ", ".join(hold_list)
@@ -218,8 +217,7 @@ def scan(account_info='accounts.yaml', config='config_rt_bot.yaml'):
 
 def main(argv):
     current_file = os.path.basename(__file__)
-    usage_msg = "Usage: {} -a <account_info_file> -c <config_file>".format(
-        current_file)
+    usage_msg = f"Usage: {current_file} -a <account_info_file> -c <config_file>"
 
     account_info_file = ''
     config_file = ''

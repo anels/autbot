@@ -24,8 +24,7 @@ def update_trade_history(symbol, operation, amount, price, file_name):
 
 def send_email(subject, message, receiver_list, sender_username, sender_password):
     fromaddr = sender_username
-    body = "Dear trader:\n\n{}\n".format(
-        datetime.now()) + message + " \n\n- R from TBot"
+    body = f"Dear trader:\n\n{datetime.now()}\n{message}\n\n- R from TBot"
 
     toaddr = receiver_list
     cc = []

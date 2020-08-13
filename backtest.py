@@ -149,13 +149,6 @@ def buy_n_hold(init_balance, df, output="oneline"):
 
     return final_Profit
 
-    # print("Asset: {} + {}@{} = {} (Profit:{}%)".format(
-    #     init_balance - cost,
-    #     purchase,
-    #     last_price,
-    #     init_balance - cost + last_price*purchase,
-    #     float((last_price*purchase - cost)/init_balance*100)))
-
 
 def plot_heatmap(test_result, title, x_label, y_label):
     fig, ax = plt.subplots(figsize=(9, 9))
