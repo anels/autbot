@@ -5,16 +5,16 @@ from data_preparation import *
 from misc import timeit
 
 
-
-def buy_sell(df, sell_or_buy):
+def buy_sell(df, sell_or_buy, start=500):
     Buy = []
     Sell = []
     status = 0  # status == 1 has positions
 
-    Buy.append(np.nan)
-    Sell.append(np.nan)
+    for i in range(start):
+        Buy.append(np.nan)
+        Sell.append(np.nan)
 
-    for i in range(1, len(df)):
+    for i in range(start, len(df)):
         signal = sell_or_buy(df, i, status)
         if signal == 'buy':
             Buy.append(df['close'][i])
@@ -137,9 +137,9 @@ def test(init_balance, df, strategy, output='oneline', verbose=False):
     return (final_profit, win_rate)
 
 
-def buy_n_hold(init_balance, df, output="oneline"):
-    purchase = math.floor(init_balance/df['close'][0])
-    cost = purchase * df['close'][0]
+def buy_n_hold(init_balance, df, start=500, output="oneline"):
+    purchase = math.floor(init_balance/df['close'][start])
+    cost = purchase * df['close'][start]
     last_price = df.iloc[-1]['close']
 
     final_Profit = float((last_price*purchase - cost)/init_balance*100)
@@ -234,17 +234,18 @@ def run_strategy(tickers, param_a, param_b, period, interval, strategy, plot_fig
         param_a[max_idxes[0]], param_b[max_idxes[1]], max_result))
 
     if plot_fig:
-        plot_heatmap(total_p, f"Profit of {strategy.__name__}", param_a, param_b)
+        plot_heatmap(
+            total_p, f"Profit of {strategy.__name__}", param_a, param_b)
         # plot_heatmap(avg_b, f"Beat % of {strategy.__name__}", param_a, param_b)
         plot_heatmap(avg_w, f"Win % of {strategy.__name__}", param_a, param_b)
 
 
 def add_buy_sell_signals(plt, df, signals):
-        buy, sell = signals
-        plt.scatter(df.index, buy,
-                    color='green', label='buy', marker='^', alpha=1)
-        plt.scatter(df.index, sell,
-                    color='red', label='sell', marker='v', alpha=1)    
+    buy, sell = signals
+    plt.scatter(df.index, buy,
+                color='green', label='buy', marker='^', alpha=1)
+    plt.scatter(df.index, sell,
+                color='red', label='sell', marker='v', alpha=1)
 
 
 def plot_wma(df, signals=None):
@@ -261,8 +262,10 @@ def plot_wma(df, signals=None):
     plt.ylabel('Price')
     plt.legend(loc='upper left')
 
+
 def plot_supertrend(df, signals=None):
-    f, axarr = plt.subplots(2, sharex=True, figsize=(16, 10), gridspec_kw={'height_ratios': [3, 1]})
+    f, axarr = plt.subplots(2, sharex=True, figsize=(
+        16, 10), gridspec_kw={'height_ratios': [3, 1]})
     f.subplots_adjust(hspace=0)
     # plt.suptitle('SuperTrend Strategy')
 
@@ -272,14 +275,15 @@ def plot_supertrend(df, signals=None):
     if signals is not None:
         add_buy_sell_signals(axarr[0], df, signals)
 
-    #plt.xticks(rotation=45)
-    #plt.ylabel('Price')
+    # plt.xticks(rotation=45)
+    # plt.ylabel('Price')
     axarr[0].legend(loc='upper left')
 
     axarr[1].plot(df['trend'], label='trend', color='red')
     axarr[1].legend(loc='upper left')
-    #plt.xticks(rotation=45)
-    #plt.xlabel('Time')
+    # plt.xticks(rotation=45)
+    # plt.xlabel('Time')
+
 
 def plot_rvwma(df, signals=None):
     plt.figure(figsize=(16, 4.5))
@@ -295,13 +299,14 @@ def plot_rvwma(df, signals=None):
     plt.ylabel('Price')
     plt.legend(loc='upper left')
 
+
 def plot_macd(df, signals=None):
-    f, axarr = plt.subplots(2, sharex=True, figsize=(16, 10), gridspec_kw={'height_ratios': [3, 1]})
+    f, axarr = plt.subplots(2, sharex=True, figsize=(
+        16, 10), gridspec_kw={'height_ratios': [3, 1]})
     f.subplots_adjust(hspace=0)
     axarr[0].plot(df['close'], alpha=0.35)
     if signals is not None:
         add_buy_sell_signals(axarr[0], df, signals)
-
 
     #axarr[1].plot(TA.KST(df), alpha=0.5)
     axarr[1].plot(df.index, df['MACD'], label='MACD', color='red')
@@ -330,7 +335,6 @@ def plot_hma(df, signals=None):
     plt.legend(loc='upper left')
 
 
-
 def plot_kagi(df, signals=None):
     plt.figure(figsize=(16, 4.5))
     plt.plot(df['kagi'], label='kagi', alpha=0.35)
@@ -344,4 +348,3 @@ def plot_kagi(df, signals=None):
     plt.xticks(rotation=45)
     plt.ylabel('Price')
     plt.legend(loc='upper left')
-
