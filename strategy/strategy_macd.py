@@ -1,7 +1,5 @@
 import numpy as np
-import matplotlib.pyplot as plt
 from finta import TA
-from backtest import *
 
 
 def prep_data(df, fast_period=12, slow_period=24):
@@ -40,21 +38,3 @@ def sell_or_buy(df, i, status):
         return 'sell'
     else:
         return 'hold'
-
-
-def plot(df, sim=False):
-    f, axarr = plt.subplots(2, sharex=True, figsize=(16, 10))
-    f.subplots_adjust(hspace=0)
-    axarr[0].plot(df['close'], alpha=0.35)
-    if sim:
-        buy, sell = buy_sell(df, sell_or_buy)
-        axarr[0].scatter(df.index, buy,
-                         color='green', label='buy', marker='^', alpha=1)
-        axarr[0].scatter(df.index, sell,
-                         color='red', label='sell', marker='v', alpha=1)
-
-    axarr[1].plot(df.index, df['MACD'], label='MACD', color='red')
-    axarr[1].plot(df.index, df['Signal'], label='Signal',
-                  color='blue', alpha=0.35)
-
-    plt.title('MACD Strategy')

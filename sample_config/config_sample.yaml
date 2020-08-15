@@ -24,9 +24,9 @@ init_balance: 1000
 enable_robinhood: false # true or false
 
 #logs
-status_file: "logs/status.json"
-history_file: "logs/history.txt"
-log_file: "logs/log.log"
+status_file: 'logs/status.json'
+history_file: 'logs/history.txt'
+log_file: 'logs/log.log'
 
 # watch list
 watch_list:

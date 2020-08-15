@@ -1,7 +1,5 @@
 import numpy as np
-import matplotlib.pyplot as plt
 from finta import TA
-from backtest import *
 
 
 def prep_data(df, multiplier=3, atr_period=50):
@@ -75,30 +73,6 @@ def sell_signal_st(df, i):
         return True
     else:
         return False
-
-
-def plot(df, sim=False):
-    plt.figure(figsize=(16, 4.5))
-    plt.plot(df['s_up'], label='Lowerbound', alpha=0.35)
-    plt.plot(df['s_dn'], label='Upperbound', alpha=0.35)
-    plt.plot(df['close'], label='close', alpha=0.35)
-    if sim:
-        buy, sell = buy_sell(df, sell_or_buy)
-        plt.scatter(df.index, buy,
-                    color='green', label='buy', marker='^', alpha=1)
-        plt.scatter(df.index, sell,
-                    color='red', label='sell', marker='v', alpha=1)
-    plt.title('SuperTrend Strategy')
-    plt.xticks(rotation=45)
-    plt.ylabel('Price')
-    plt.legend(loc='upper left')
-
-    plt.figure(figsize=(16, 2))
-    plt.plot(df['trend'], label='trend', color='red')
-    #plt.legend(loc='upper left')
-    plt.xticks(rotation=45)
-    plt.xlabel('Time')
-    plt.show()
 
 
 def sell_or_buy(df, i, status):

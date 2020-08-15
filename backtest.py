@@ -5,6 +5,7 @@ from data_preparation import *
 from misc import timeit
 
 
+
 def buy_sell(df, sell_or_buy):
     Buy = []
     Sell = []
@@ -177,8 +178,7 @@ def plot_heatmap(test_result, title, x_label, y_label):
 
 
 @timeit
-def run_benchmark(tickers, param_a, param_b, period, interval, strategy):
-    init_balance = 10000
+def run_benchmark(tickers, param_a, param_b, period, interval, strategy,  init_balance=10000):
 
     profit_results = []
     winrate_results = []
@@ -213,8 +213,7 @@ def run_benchmark(tickers, param_a, param_b, period, interval, strategy):
     return (profit_results, winrate_results, beat_results)
 
 
-def run_strategy(tickers, param_a, param_b, period, interval, strategy):
-
+def run_strategy(tickers, param_a, param_b, period, interval, strategy, plot_fig=False):
     (p_results, w_results, b_results) = run_benchmark(
         tickers, param_a, param_b, period, interval, strategy)
 
@@ -228,6 +227,121 @@ def run_strategy(tickers, param_a, param_b, period, interval, strategy):
     avg_b = total_b * 100.0 / len(tickers)
     avg_w = total_w / len(tickers)
 
-    plot_heatmap(total_p, f"Profit of {strategy.__name__}", param_a, param_b)
-    plot_heatmap(avg_b, f"Beat % of {strategy.__name__}", param_a, param_b)
-    plot_heatmap(avg_w, f"Win % of {strategy.__name__}", param_a, param_b)
+    max_result = np.max(total_p)
+    max_idxes = np.unravel_index(np.argmax(total_p, axis=None), total_p.shape)
+
+    print("The best config is ({}, {}) profit margin is {}%.".format(
+        param_a[max_idxes[0]], param_b[max_idxes[1]], max_result))
+
+    if plot_fig:
+        plot_heatmap(total_p, f"Profit of {strategy.__name__}", param_a, param_b)
+        # plot_heatmap(avg_b, f"Beat % of {strategy.__name__}", param_a, param_b)
+        plot_heatmap(avg_w, f"Win % of {strategy.__name__}", param_a, param_b)
+
+
+def add_buy_sell_signals(plt, df, signals):
+        buy, sell = signals
+        plt.scatter(df.index, buy,
+                    color='green', label='buy', marker='^', alpha=1)
+        plt.scatter(df.index, sell,
+                    color='red', label='sell', marker='v', alpha=1)    
+
+
+def plot_wma(df, signals=None):
+    plt.figure(figsize=(16, 4.5))
+    plt.plot(df['wma'], label='wma', alpha=0.35)
+    plt.plot(df['ema'], label='ema', alpha=0.35)
+    plt.plot(df['close'], label='close', alpha=0.35)
+    if signals is not None:
+        add_buy_sell_signals(plt, df, signals)
+
+    # plt.title('WMA Strategy')
+    plt.xlabel('Time')
+    plt.xticks(rotation=45)
+    plt.ylabel('Price')
+    plt.legend(loc='upper left')
+
+def plot_supertrend(df, signals=None):
+    f, axarr = plt.subplots(2, sharex=True, figsize=(16, 10), gridspec_kw={'height_ratios': [3, 1]})
+    f.subplots_adjust(hspace=0)
+    # plt.suptitle('SuperTrend Strategy')
+
+    axarr[0].plot(df['s_up'], label='Lowerbound', alpha=0.35)
+    axarr[0].plot(df['s_dn'], label='Upperbound', alpha=0.35)
+    axarr[0].plot(df['close'], label='close', alpha=0.35)
+    if signals is not None:
+        add_buy_sell_signals(axarr[0], df, signals)
+
+    #plt.xticks(rotation=45)
+    #plt.ylabel('Price')
+    axarr[0].legend(loc='upper left')
+
+    axarr[1].plot(df['trend'], label='trend', color='red')
+    axarr[1].legend(loc='upper left')
+    #plt.xticks(rotation=45)
+    #plt.xlabel('Time')
+
+def plot_rvwma(df, signals=None):
+    plt.figure(figsize=(16, 4.5))
+    plt.plot(df['rvwma'], label='rvwma', alpha=0.35)
+    plt.plot(df['wma'], label='wma', alpha=0.35)
+    plt.plot(df['close'], label='close', alpha=0.35)
+    if signals is not None:
+        add_buy_sell_signals(plt, df, signals)
+
+    plt.title('RVWMA Strategy')
+    plt.xlabel('Time')
+    plt.xticks(rotation=45)
+    plt.ylabel('Price')
+    plt.legend(loc='upper left')
+
+def plot_macd(df, signals=None):
+    f, axarr = plt.subplots(2, sharex=True, figsize=(16, 10), gridspec_kw={'height_ratios': [3, 1]})
+    f.subplots_adjust(hspace=0)
+    axarr[0].plot(df['close'], alpha=0.35)
+    if signals is not None:
+        add_buy_sell_signals(axarr[0], df, signals)
+
+
+    #axarr[1].plot(TA.KST(df), alpha=0.5)
+    axarr[1].plot(df.index, df['MACD'], label='MACD', color='red')
+    axarr[1].plot(df.index, df['Signal'], label='Signal',
+                  color='blue', alpha=0.35)
+
+    # plt.title('MACD Strategy')
+    # axarr[0].ylabel('Price')
+    # axarr[0].legend(loc='upper left')
+    # f.xticks(rotation=45)
+    # f.xlabel('Time')
+
+
+def plot_hma(df, signals=None):
+    plt.figure(figsize=(16, 4.5))
+    plt.plot(df['hma_fast'], label='hma_fast', alpha=0.35)
+    plt.plot(df['hma_slow'], label='hma_slow', alpha=0.35)
+    plt.plot(df['close'], label='close', alpha=0.35)
+    if signals is not None:
+        add_buy_sell_signals(plt, df, signals)
+
+    plt.title('HMA Strategy')
+    plt.xlabel('Time')
+    plt.xticks(rotation=45)
+    plt.ylabel('Price')
+    plt.legend(loc='upper left')
+
+
+
+def plot_kagi(df, signals=None):
+    plt.figure(figsize=(16, 4.5))
+    plt.plot(df['kagi'], label='kagi', alpha=0.35)
+    plt.plot(df['wma'], label='wma', alpha=0.35)
+    plt.plot(df['close'], label='close', alpha=0.35)
+    if signals is not None:
+        add_buy_sell_signals(plt, df, signals)
+
+    # plt.title('KAGI Strategy')
+    plt.xlabel('Time')
+    plt.xticks(rotation=45)
+    plt.ylabel('Price')
+    plt.legend(loc='upper left')
+
