@@ -248,11 +248,13 @@ def add_buy_sell_signals(plt, df, signals):
                 color='red', label='sell', marker='v', alpha=1)
 
 
-def plot_wma(df, signals=None):
+def plot_wma(df, signals=None, start=500):
     plt.figure(figsize=(16, 4.5))
+    plt.plot(df['close'], label='close', alpha=0.35)
+    plt.vlines(x=start, ymin=min(df['close']), ymax=max(
+        df['close']), linestyle='--', alpha=0.35, color='blue')
     plt.plot(df['wma'], label='wma', alpha=0.35)
     plt.plot(df['ema'], label='ema', alpha=0.35)
-    plt.plot(df['close'], label='close', alpha=0.35)
     if signals is not None:
         add_buy_sell_signals(plt, df, signals)
 
@@ -263,15 +265,17 @@ def plot_wma(df, signals=None):
     plt.legend(loc='upper left')
 
 
-def plot_supertrend(df, signals=None):
+def plot_supertrend(df, signals=None, start=500):
     f, axarr = plt.subplots(2, sharex=True, figsize=(
         16, 10), gridspec_kw={'height_ratios': [3, 1]})
     f.subplots_adjust(hspace=0)
     # plt.suptitle('SuperTrend Strategy')
+    axarr[0].plot(df['close'], label='close', alpha=0.35)
+    axarr[0].vlines(x=start, ymin=min(df['close']), ymax=max(
+        df['close']), linestyle='--', alpha=0.35, color='blue')
 
     axarr[0].plot(df['s_up'], label='Lowerbound', alpha=0.35)
     axarr[0].plot(df['s_dn'], label='Upperbound', alpha=0.35)
-    axarr[0].plot(df['close'], label='close', alpha=0.35)
     if signals is not None:
         add_buy_sell_signals(axarr[0], df, signals)
 
@@ -285,11 +289,14 @@ def plot_supertrend(df, signals=None):
     # plt.xlabel('Time')
 
 
-def plot_rvwma(df, signals=None):
+def plot_rvwma(df, signals=None, start=500):
     plt.figure(figsize=(16, 4.5))
     plt.plot(df['rvwma'], label='rvwma', alpha=0.35)
     plt.plot(df['wma'], label='wma', alpha=0.35)
     plt.plot(df['close'], label='close', alpha=0.35)
+    plt.vlines(x=start, ymin=min(df['close']), ymax=max(
+        df['close']), linestyle='--', alpha=0.35, color='blue')
+
     if signals is not None:
         add_buy_sell_signals(plt, df, signals)
 
@@ -300,11 +307,13 @@ def plot_rvwma(df, signals=None):
     plt.legend(loc='upper left')
 
 
-def plot_macd(df, signals=None):
+def plot_macd(df, signals=None, start=500):
     f, axarr = plt.subplots(2, sharex=True, figsize=(
         16, 10), gridspec_kw={'height_ratios': [3, 1]})
     f.subplots_adjust(hspace=0)
     axarr[0].plot(df['close'], alpha=0.35)
+    axarr[0].vlines(x=start, ymin=min(df['close']), ymax=max(
+        df['close']), linestyle='--', alpha=0.35, color='blue')
     if signals is not None:
         add_buy_sell_signals(axarr[0], df, signals)
 
@@ -320,11 +329,13 @@ def plot_macd(df, signals=None):
     # f.xlabel('Time')
 
 
-def plot_hma(df, signals=None):
+def plot_hma(df, signals=None, start=500):
     plt.figure(figsize=(16, 4.5))
     plt.plot(df['hma_fast'], label='hma_fast', alpha=0.35)
     plt.plot(df['hma_slow'], label='hma_slow', alpha=0.35)
     plt.plot(df['close'], label='close', alpha=0.35)
+    plt.vlines(x=start, ymin=min(df['close']), ymax=max(
+        df['close']), linestyle='--', alpha=0.35, color='blue')
     if signals is not None:
         add_buy_sell_signals(plt, df, signals)
 
@@ -335,11 +346,13 @@ def plot_hma(df, signals=None):
     plt.legend(loc='upper left')
 
 
-def plot_kagi(df, signals=None):
+def plot_kagi(df, signals=None, start=500):
     plt.figure(figsize=(16, 4.5))
     plt.plot(df['kagi'], label='kagi', alpha=0.35)
     plt.plot(df['wma'], label='wma', alpha=0.35)
     plt.plot(df['close'], label='close', alpha=0.35)
+    plt.vlines(x=start, ymin=min(df['close']), ymax=max(
+        df['close']), linestyle='--', alpha=0.35, color='blue')
     if signals is not None:
         add_buy_sell_signals(plt, df, signals)
 

@@ -3,6 +3,9 @@ from finta import TA
 
 
 def prep_data(df, fast_period=12, slow_period=24):
+    if fast_period > slow_period:
+        fast_period = slow_period
+
     shortEMA = df['close'].ewm(span=fast_period, adjust=False).mean()
     longEMA = df['close'].ewm(span=slow_period, adjust=False).mean()
 

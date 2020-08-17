@@ -7,10 +7,10 @@ import time
 
 def timeit(func):
     def inner(*args):
-        t = time.process_time()
+        t = time.time_ns()
         result = func(*args)
-        elapsed_time = time.process_time() - t
-        print(f"{func.__name__} finished in {elapsed_time:.2f} secs.")
+        elapsed_time = (time.time_ns() - t) / (10 ** 9)
+        print(f"{func.__name__} finished in {elapsed_time:.6f} secs.")
         return result
     return inner
 
