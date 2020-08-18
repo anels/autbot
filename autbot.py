@@ -61,6 +61,7 @@ def scan(account_info='accounts.yaml', config='config_rt_bot.yaml'):
     refresh_interval = config['refresh']
     toaddr = config['email_receivers']
     email_prefix = config['email_prefix']
+    email_mode = config['email_mode']
     init_balance = config['init_balance']
     enable_robinhood = config['enable_robinhood']
     ticker_list = config['watch_list']
@@ -180,8 +181,13 @@ def scan(account_info='accounts.yaml', config='config_rt_bot.yaml'):
                         status_list[ticker]['status'] = 0
                         playsound('resources/coin.mp3')
 
-                    transcation_record = "{} {} {} @ {:.2f}".format(sign.upper(), transaction_num,
-                                                                    ticker, close_price)
+                    if email_mode == "reminder":
+                        transcation_record = "{} {} @ {:.2f}".format(
+                            sign.upper(), ticker, close_price)
+                    else:
+                        transcation_record = "{} {} {} @ {:.2f}".format(
+                            sign.upper(), transaction_num, ticker, close_price)
+
                     logging.info(transcation_record)
                     info_str += "{}!\n".format(transcation_record)
 
@@ -199,14 +205,21 @@ def scan(account_info='accounts.yaml', config='config_rt_bot.yaml'):
                 json.dump(status_list, f, indent=6)
 
             if len(trade_list) > 0:
-                trade_list_str = "/".join(trade_list)
-                title = f"Trade Notification for {trade_list_str}" if len(
-                    trade_list) > 1 else info_str
-                body_text = f"{info_str}\n\nRobinhood Receipt:\n{receipt_str}" if enable_robinhood else info_str
-                prefix = f"[AuTBot][{email_prefix}]" if email_prefix and email_prefix.strip(
-                ) else "[AuTBot]"
-                send_email(f"{prefix} {title}!", body_text, toaddr,
-                           email_sender_username, email_sender_password)
+                header = f"[TBot][{email_prefix}]" if email_prefix and email_prefix.strip(
+                ) else "[TBot]"
+                if len(trade_list) > 1:
+                    trade_list_str = "/".join(trade_list)
+                    title = " Trade Reminder" if email_mode == "reminder" else " Trade Notification"
+                    header += f"{title} for {trade_list_str}!"
+                else:
+                    headder += f"{info_str}!"
+
+                body_text = info_str
+                if enable_robinhood:
+                    body_text += f"\n\nRobinhood Receipt:\n{receipt_str }"
+
+                send_email(header,
+                           body_text, toaddr, email_sender_username, email_sender_password)
 
             if len(hold_list) > 0:
                 hold_list_str = ", ".join(hold_list)

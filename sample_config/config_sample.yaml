@@ -16,6 +16,7 @@ email_receivers:
   # - youremail1@gmail.com
   # - youremail2@gmail.com
 # add to the email subject to distinguish different config (if you want to test multiple strategy or parameters)
+email_mode: notification # notification or reminder
 
 # real time simulation/trade
 init_balance: 1000
