@@ -2,6 +2,9 @@
 
 This bot automatically retrieves stock data from yahoo finance and using one of the strategy to decide buy or sell. If you config your robinhood account. It can automatically place order on robinhood.
 
+## Download
+Please go to Release section to get the latest release or clone this repo.
+
 ## Installation
 
 Step 1.
