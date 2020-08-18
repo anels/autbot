@@ -60,8 +60,8 @@ def scan(account_info='accounts.yaml', config='config_rt_bot.yaml'):
     log_file = config['log_file']
     refresh_interval = config['refresh']
     toaddr = config['email_receivers']
-    email_prefix = config['email_prefix']
-    email_mode = config['email_mode']
+    email_prefix = config['email_prefix'] if 'email_prefix' in config else None
+    email_mode = config['email_mode'] if 'email_mode' in config else 'reminder'
     init_balance = config['init_balance']
     enable_robinhood = config['enable_robinhood']
     ticker_list = config['watch_list']
