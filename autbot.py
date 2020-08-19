@@ -209,10 +209,10 @@ def scan(account_info='accounts.yaml', config='config_rt_bot.yaml'):
                 ) else "[TBot]"
                 if len(trade_list) > 1:
                     trade_list_str = "/".join(trade_list)
-                    title = " Trade Reminder" if email_mode == "reminder" else " Trade Notification"
-                    header += f"{title} for {trade_list_str}!"
+                    title = "Trade Reminder" if email_mode == "reminder" else "Trade Notification"
+                    header += f" {title} for {trade_list_str}!"
                 else:
-                    headder += f"{info_str}!"
+                    header += f" {info_str}!"
 
                 body_text = info_str
                 if enable_robinhood:
