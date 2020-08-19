@@ -125,8 +125,12 @@ def scan(account_info='accounts.yaml', config='config_rt_bot.yaml'):
             info_str = ""
             receipt_str = ""
 
-            dfs, _ = mass_refresh(ticker_list, period='5d',
-                                  interval=config['interval'])
+            try:
+                dfs, _ = mass_refresh(
+                    ticker_list, period='5d', interval=config['interval'])
+            except Exception as e:
+                logging.error(e)
+                continue
 
             for ticker in ticker_list:
                 df = dfs[ticker]
