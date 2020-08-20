@@ -9,7 +9,6 @@ import sys
 import pandas as pd
 import robin_stocks as r
 from datetime import datetime, timedelta
-from playsound import playsound
 from data_preparation import *
 from misc import *
 
@@ -55,10 +54,13 @@ def scan(account_info='accounts.yaml', config='config_rt_bot.yaml'):
     robinhood_password = accounts['robinhood_password']
     email_sender_username = accounts['gmail_username']
     email_sender_password = accounts['gmail_password']
+
     status_file = config['status_file']
     history_file = config['history_file']
     log_file = config['log_file']
     refresh_interval = config['refresh']
+    enable_sound = config['enable_sound'] if 'enable_sound' in config else False
+
     toaddr = config['email_receivers']
     email_prefix = config['email_prefix'] if 'email_prefix' in config else None
     email_mode = config['email_mode'] if 'email_mode' in config else 'reminder'
@@ -85,6 +87,9 @@ def scan(account_info='accounts.yaml', config='config_rt_bot.yaml'):
 
     strategy = get_strategy(strategy_name)
 
+    if enable_sound:
+        from playsound import playsound
+
     if not os.path.exists(status_file):
         print("Status file does not exist!")
 
@@ -110,14 +115,15 @@ def scan(account_info='accounts.yaml', config='config_rt_bot.yaml'):
         if now.weekday() > 4 and now.weekday() < 6:
             break
 
-        if now.hour >= 13 or now.hour < 6:
+        if now.hour >= 13 or now.hour < 6:  # for PST, if you are in EST change it to 16 and 9
             next_wake_time = now + timedelta(days=1)
             next_wake_time = next_wake_time.replace(
                 hour=6, minute=00, second=0)
             delta = next_wake_time - now
             logging.info(
                 f"Go to sleep now, will wake up at {next_wake_time}...")
-            playsound('resources/snoring.mp3')
+            if enable_sound:
+                playsound('resources/snoring.mp3')
             time.sleep(delta.seconds)
         else:
             hold_list = []
@@ -169,7 +175,8 @@ def scan(account_info='accounts.yaml', config='config_rt_bot.yaml'):
                         status_list[ticker]['holding_num'] += transaction_num
                         status_list[ticker]['balance_cash'] -= transaction_num * close_price
                         status_list[ticker]['status'] = 1
-                        playsound('resources/register.mp3')
+                        if enable_sound:
+                            playsound('resources/register.mp3')
                     elif sign == 'sell':
                         transaction_num = status_list[ticker]['holding_num']
 
@@ -183,7 +190,8 @@ def scan(account_info='accounts.yaml', config='config_rt_bot.yaml'):
                         status_list[ticker]['balance_cash'] += transaction_num * close_price
                         status_list[ticker]['holding_num'] = 0
                         status_list[ticker]['status'] = 0
-                        playsound('resources/coin.mp3')
+                        if enable_sound:
+                            playsound('resources/coin.mp3')
 
                     if email_mode == "reminder":
                         transcation_record = "{} {} @ {:.2f}".format(

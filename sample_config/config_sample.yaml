@@ -4,6 +4,8 @@
 refresh: 150
 interval: 5m
 
+enable_sound: True
+
 # strategy
 strategy: wma
 strategy_params:
@@ -22,7 +24,7 @@ email_mode: notification # notification or reminder
 init_balance: 1000
 
 # robinhood
-enable_robinhood: false # true or false
+enable_robinhood: False # True or False
 
 #logs
 status_file: 'logs/status.json'
