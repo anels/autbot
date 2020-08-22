@@ -134,8 +134,11 @@ def scan(account_info='accounts.yaml', config='config_rt_bot.yaml'):
             try:
                 dfs, _ = mass_refresh(
                     ticker_list, period='5d', interval=config['interval'])
+            except ValueError as ve:
+                logging.error(f"ValueError: ", exc_info=ve)
+                continue
             except Exception as e:
-                logging.error(e)
+                logging.error(f"Exception: ", exc_info=e)
                 continue
 
             for ticker in ticker_list:
