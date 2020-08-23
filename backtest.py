@@ -214,7 +214,7 @@ def run_benchmark(
     print("Running Benchmark for {}...".format(strategy.__name__))
     for idx, ticker in enumerate(tickers):
         print(
-            f">> Testing {ticker: <8} ... {(idx + 1.0)/len(tickers)*100.0:6.2f}% ({idx+1}/{len(tickers)})",
+            f">> Testing {ticker: <8} ... {(idx)/len(tickers)*100.0:6.2f}% ({idx}/{len(tickers)})",
             end="\r",
         )
 
@@ -244,6 +244,11 @@ def run_benchmark(
         profit_results.append(p_result)
         winrate_results.append(w_result)
         beat_results.append(b_result)
+
+        print(
+            " " * 80, end="\r",
+        )
+
     return (profit_results, winrate_results, beat_results)
 
 
@@ -285,7 +290,8 @@ def run_strategy(tickers, param_a, param_b, period, interval, strategy, plot_fig
 
         for i in range(0, min(len(win_picks), 5)):
             print(
-                "The win config for {} is ({}, {}) profit margin is {:.4f}%.".format(
+                "  The #{} config for {} is ({}, {}) profit margin is {:.4f}%.".format(
+                    i + 1,
                     strategy.__name__,
                     param_a[win_picks[i][0]],
                     param_b[win_picks[i][1]],
