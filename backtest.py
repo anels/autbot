@@ -264,7 +264,7 @@ def run_strategy(tickers, param_a, param_b, period, interval, strategy, plot_fig
 
     win_coordinates = np.where(total_b > 0.75)
 
-    if win_coordinates == None:
+    if len(win_coordinates[0]) == 0:
         max_result = np.max(total_p)
         max_idxes = np.unravel_index(np.argmax(total_p, axis=None), total_p.shape)
         print(
