@@ -16,13 +16,13 @@ def buy_sell(df, sell_or_buy, start=500):
 
     for i in range(start, len(df)):
         signal = sell_or_buy(df, i, status)
-        if signal == 'buy':
-            Buy.append(df['close'][i])
+        if signal == "buy":
+            Buy.append(df["close"][i])
             Sell.append(np.nan)
             status = 1
-        elif signal == 'sell':
+        elif signal == "sell":
             Buy.append(np.nan)
-            Sell.append(df['close'][i])
+            Sell.append(df["close"][i])
             status = 0
         else:
             Buy.append(np.nan)
@@ -31,45 +31,52 @@ def buy_sell(df, sell_or_buy, start=500):
     return (Buy, Sell)
 
 
-def test(init_balance, df, strategy, output='oneline', verbose=False):
+def test(init_balance, df, strategy, output="oneline", verbose=False):
     balance = init_balance
     holdings = 0
 
     a = buy_sell(df, strategy)
-    df['Buy_Signal_price'] = a[0]
-    df['Sell_Signal_price'] = a[1]
+    df["Buy_Signal_price"] = a[0]
+    df["Sell_Signal_price"] = a[1]
 
     trade_history = []
     curr_trade = {}
 
     for i in range(0, len(df)):
-        if not math.isnan(df['Buy_Signal_price'][i]):
-            purchase = math.floor(balance/df['Buy_Signal_price'][i])
-            cost = purchase * df['Buy_Signal_price'][i]
+        if not math.isnan(df["Buy_Signal_price"][i]):
+            purchase = math.floor(balance / df["Buy_Signal_price"][i])
+            cost = purchase * df["Buy_Signal_price"][i]
 
             holdings += purchase
             balance -= cost
-            curr_trade['open'] = df['Buy_Signal_price'][i]
-            curr_trade['amount'] = purchase
-            curr_trade['open_time'] = df['Time'][i]
+            curr_trade["open"] = df["Buy_Signal_price"][i]
+            curr_trade["amount"] = purchase
+            curr_trade["open_time"] = df["Time"][i]
 
             if verbose:
-                print("{}: Buy {} @ {}, balance = {}".format(
-                    df['Time'][i], purchase, df['Buy_Signal_price'][i], balance))
-        elif not math.isnan(df['Sell_Signal_price'][i]) and holdings > 0:
-            balance += holdings * df['Sell_Signal_price'][i]
-            curr_trade['close'] = df['Sell_Signal_price'][i]
-            curr_trade['amount'] = holdings
-            curr_trade['close_time'] = df['Time'][i]
-            curr_trade['profit'] = (
-                curr_trade['close'] - curr_trade['open']) / curr_trade['open']
+                print(
+                    "{}: Buy {} @ {}, balance = {}".format(
+                        df["Time"][i], purchase, df["Buy_Signal_price"][i], balance
+                    )
+                )
+        elif not math.isnan(df["Sell_Signal_price"][i]) and holdings > 0:
+            balance += holdings * df["Sell_Signal_price"][i]
+            curr_trade["close"] = df["Sell_Signal_price"][i]
+            curr_trade["amount"] = holdings
+            curr_trade["close_time"] = df["Time"][i]
+            curr_trade["profit"] = (
+                curr_trade["close"] - curr_trade["open"]
+            ) / curr_trade["open"]
 
             trade_history.append(curr_trade)
 
             curr_trade = {}
             if verbose:
-                print("{}: Sell {} @ {}, balance = {}".format(
-                    df['Time'][i], holdings, df['Sell_Signal_price'][i], balance))
+                print(
+                    "{}: Sell {} @ {}, balance = {}".format(
+                        df["Time"][i], holdings, df["Sell_Signal_price"][i], balance
+                    )
+                )
             holdings = 0
 
     num_win = 0
@@ -83,40 +90,50 @@ def test(init_balance, df, strategy, output='oneline', verbose=False):
 
     for i in range(0, len(trade_history)):
         curr_trade = trade_history[i]
-        if curr_trade['profit'] > 0:
+        if curr_trade["profit"] > 0:
             num_win += 1
-            total_win += curr_trade['profit']
-            max_win = curr_trade['profit'] if curr_trade['profit'] > max_win else max_win
+            total_win += curr_trade["profit"]
+            max_win = (
+                curr_trade["profit"] if curr_trade["profit"] > max_win else max_win
+            )
         else:
             num_lose += 1
-            total_lose += curr_trade['profit']
-            max_lose = curr_trade['profit'] if curr_trade['profit'] < max_lose else max_lose
+            total_lose += curr_trade["profit"]
+            max_lose = (
+                curr_trade["profit"] if curr_trade["profit"] < max_lose else max_lose
+            )
 
-        duration = (curr_trade['close_time'] -
-                    curr_trade['open_time']).total_seconds() / 3600
+        duration = (
+            curr_trade["close_time"] - curr_trade["open_time"]
+        ).total_seconds() / 3600
         total_duration += duration
         max_duration = duration if duration > max_duration else max_duration
         min_duration = duration if duration < min_duration else min_duration
 
-    final_balance = balance + holdings * df.iloc[-1]['close']
+    final_balance = balance + holdings * df.iloc[-1]["close"]
     final_profit = float(final_balance - init_balance) / init_balance * 100
-    win_rate = float(num_win / len(trade_history)) * \
-        100 if len(trade_history) > 0 else 0.0
+    win_rate = (
+        float(num_win / len(trade_history)) * 100 if len(trade_history) > 0 else 0.0
+    )
 
     if output == "oneline":
         if len(trade_history) > 0:
-            print("Balance: {0:.2f} (Profit:{1:.2f}%, # of Trade:{2}, Win:{3:.2f}%, avg: win {4:.2f}% / lose {5:.2f}%)"
-                  .format(final_balance,
-                          final_profit,
-                          len(trade_history),
-                          win_rate,
-                          total_win / len(trade_history) * 100,
-                          total_lose / len(trade_history) * 100))
+            print(
+                "Balance: {0:.2f} (Profit:{1:.2f}%, # of Trade:{2}, Win:{3:.2f}%, avg: win {4:.2f}% / lose {5:.2f}%)".format(
+                    final_balance,
+                    final_profit,
+                    len(trade_history),
+                    win_rate,
+                    total_win / len(trade_history) * 100,
+                    total_lose / len(trade_history) * 100,
+                )
+            )
         else:
-            print("Balance: {0: .2f} (Profit:{1: .2f}%, # of Trade:{2})"
-                  .format(final_balance,
-                          final_profit,
-                          len(trade_history)))
+            print(
+                "Balance: {0: .2f} (Profit:{1: .2f}%, # of Trade:{2})".format(
+                    final_balance, final_profit, len(trade_history)
+                )
+            )
 
     elif output == "report" and len(trade_history) > 0:
         print("Total # of Trades: {}".format(len(trade_history)))
@@ -138,22 +155,25 @@ def test(init_balance, df, strategy, output='oneline', verbose=False):
 
 
 def buy_n_hold(init_balance, df, start=500, output="oneline"):
-    purchase = math.floor(init_balance/df['close'][start])
-    cost = purchase * df['close'][start]
-    last_price = df.iloc[-1]['close']
+    purchase = math.floor(init_balance / df["close"][start])
+    cost = purchase * df["close"][start]
+    last_price = df.iloc[-1]["close"]
 
-    final_Profit = float((last_price*purchase - cost)/init_balance*100)
+    final_Profit = float((last_price * purchase - cost) / init_balance * 100)
 
     if output == "oneline":
-        print("Asset: {0:.2f} (Profit:{1:.2f}%)".format(
-            init_balance - cost + last_price*purchase, final_Profit))
+        print(
+            "Asset: {0:.2f} (Profit:{1:.2f}%)".format(
+                init_balance - cost + last_price * purchase, final_Profit
+            )
+        )
 
     return final_Profit
 
 
 def plot_heatmap(test_result, title, x_label, y_label):
     fig, ax = plt.subplots(figsize=(9, 9))
-    im = ax.imshow(test_result, cmap='RdYlGn')
+    im = ax.imshow(test_result, cmap="RdYlGn")
 
     # We want to show all ticks...
     ax.set_yticks(np.arange(len(x_label)))
@@ -163,14 +183,19 @@ def plot_heatmap(test_result, title, x_label, y_label):
     ax.set_xticklabels(y_label)
 
     # Rotate the tick labels and set their alignment.
-    plt.setp(ax.get_xticklabels(), rotation=45, ha="right",
-             rotation_mode="anchor")
+    plt.setp(ax.get_xticklabels(), rotation=45, ha="right", rotation_mode="anchor")
 
     # Loop over data dimensions and create text annotations.
     for i in range(len(x_label)):
         for j in range(len(y_label)):
-            text = ax.text(j, i, "{0:.2f}%".format(test_result[i][j]),
-                           ha="center", va="center", color="w")
+            text = ax.text(
+                j,
+                i,
+                "{0:.2f}%".format(test_result[i][j]),
+                ha="center",
+                va="center",
+                color="w",
+            )
 
     ax.set_title(title)
     fig.tight_layout()
@@ -178,13 +203,21 @@ def plot_heatmap(test_result, title, x_label, y_label):
 
 
 @timeit
-def run_benchmark(tickers, param_a, param_b, period, interval, strategy,  init_balance=10000):
+def run_benchmark(
+    tickers, param_a, param_b, period, interval, strategy, init_balance=10000
+):
 
     profit_results = []
     winrate_results = []
     beat_results = []
-    for ticker in tickers:
-        print("Running Test for {}".format(ticker))
+
+    print("Running Benchmark for {}...".format(strategy.__name__))
+    for idx, ticker in enumerate(tickers):
+        print(
+            f">> Testing {ticker: <8} ... {(idx + 1.0)/len(tickers)*100.0:6.2f}% ({idx+1}/{len(tickers)})",
+            end="\r",
+        )
+
         df, last_update = refresh(ticker, period, interval)
         bnh = buy_n_hold(init_balance, df, output="None")
 
@@ -198,9 +231,10 @@ def run_benchmark(tickers, param_a, param_b, period, interval, strategy,  init_b
             b_result_i = []
             for j in param_b:
                 df_test = strategy.prep_data(df, i, j)
-                #print ("{},{} => ".format(i, j), end='')
-                test_result = test(init_balance, df_test,
-                                   strategy.sell_or_buy, output='None')
+                # print ("{},{} => ".format(i, j), end='')
+                test_result = test(
+                    init_balance, df_test, strategy.sell_or_buy, output="None"
+                )
                 p_result_i.append(test_result[0] - bnh)
                 w_result_i.append(test_result[1])
                 b_result_i.append(1 if test_result[0] - bnh > 0 else 0)
@@ -215,7 +249,8 @@ def run_benchmark(tickers, param_a, param_b, period, interval, strategy,  init_b
 
 def run_strategy(tickers, param_a, param_b, period, interval, strategy, plot_fig=False):
     (p_results, w_results, b_results) = run_benchmark(
-        tickers, param_a, param_b, period, interval, strategy)
+        tickers, param_a, param_b, period, interval, strategy
+    )
 
     total_p = np.zeros_like(p_results[0])
     total_b = np.zeros_like(b_results[0])
@@ -227,100 +262,147 @@ def run_strategy(tickers, param_a, param_b, period, interval, strategy, plot_fig
     avg_b = total_b * 100.0 / len(tickers)
     avg_w = total_w / len(tickers)
 
-    max_result = np.max(total_p)
-    max_idxes = np.unravel_index(np.argmax(total_p, axis=None), total_p.shape)
+    win_coordinates = np.where(total_b > 0.75)
 
-    print("The best config is ({}, {}) profit margin is {}%.".format(
-        param_a[max_idxes[0]], param_b[max_idxes[1]], max_result))
+    if win_coordinates == None:
+        max_result = np.max(total_p)
+        max_idxes = np.unravel_index(np.argmax(total_p, axis=None), total_p.shape)
+        print(
+            "The best config for {} is ({}, {}) profit margin is {}%.".format(
+                strategy.__name__,
+                param_a[max_idxes[0]],
+                param_b[max_idxes[1]],
+                max_result,
+            )
+        )
+    else:
+        win_idxes = list(zip(win_coordinates[0], win_coordinates[1]))
+        win_picks = []
+        for w in win_idxes:
+            win_picks.append([w[0], w[1], total_p[w[0]][w[1]]])
+
+        win_picks.sort(reverse=True, key=lambda i: i[2])
+
+        for i in range(0, min(len(win_picks), 5)):
+            print(
+                "The win config for {} is ({}, {}) profit margin is {:.4f}%.".format(
+                    strategy.__name__,
+                    param_a[win_picks[i][0]],
+                    param_b[win_picks[i][1]],
+                    win_picks[i][2],
+                )
+            )
 
     if plot_fig:
-        plot_heatmap(
-            total_p, f"Profit of {strategy.__name__}", param_a, param_b)
+        plot_heatmap(total_p, f"Profit of {strategy.__name__}", param_a, param_b)
         # plot_heatmap(avg_b, f"Beat % of {strategy.__name__}", param_a, param_b)
         plot_heatmap(avg_w, f"Win % of {strategy.__name__}", param_a, param_b)
 
 
 def add_buy_sell_signals(plt, df, signals):
     buy, sell = signals
-    plt.scatter(df.index, buy,
-                color='green', label='buy', marker='^', alpha=1)
-    plt.scatter(df.index, sell,
-                color='red', label='sell', marker='v', alpha=1)
+    plt.scatter(df.index, buy, color="green", label="buy", marker="^", alpha=1)
+    plt.scatter(df.index, sell, color="red", label="sell", marker="v", alpha=1)
 
 
 def plot_wma(df, signals=None, start=500):
     plt.figure(figsize=(16, 4.5))
-    plt.plot(df['close'], label='close', alpha=0.35)
-    plt.vlines(x=start, ymin=min(df['close']), ymax=max(
-        df['close']), linestyle='--', alpha=0.35, color='blue')
-    plt.plot(df['wma'], label='wma', alpha=0.35)
-    plt.plot(df['ema'], label='ema', alpha=0.35)
+    plt.plot(df["close"], label="close", alpha=0.35)
+    plt.vlines(
+        x=start,
+        ymin=min(df["close"]),
+        ymax=max(df["close"]),
+        linestyle="--",
+        alpha=0.35,
+        color="blue",
+    )
+    plt.plot(df["wma"], label="wma", alpha=0.35)
+    plt.plot(df["ema"], label="ema", alpha=0.35)
     if signals is not None:
         add_buy_sell_signals(plt, df, signals)
 
     # plt.title('WMA Strategy')
-    plt.xlabel('Time')
+    plt.xlabel("Time")
     plt.xticks(rotation=45)
-    plt.ylabel('Price')
-    plt.legend(loc='upper left')
+    plt.ylabel("Price")
+    plt.legend(loc="upper left")
 
 
 def plot_supertrend(df, signals=None, start=500):
-    f, axarr = plt.subplots(2, sharex=True, figsize=(
-        16, 10), gridspec_kw={'height_ratios': [3, 1]})
+    f, axarr = plt.subplots(
+        2, sharex=True, figsize=(16, 10), gridspec_kw={"height_ratios": [3, 1]}
+    )
     f.subplots_adjust(hspace=0)
     # plt.suptitle('SuperTrend Strategy')
-    axarr[0].plot(df['close'], label='close', alpha=0.35)
-    axarr[0].vlines(x=start, ymin=min(df['close']), ymax=max(
-        df['close']), linestyle='--', alpha=0.35, color='blue')
+    axarr[0].plot(df["close"], label="close", alpha=0.35)
+    axarr[0].vlines(
+        x=start,
+        ymin=min(df["close"]),
+        ymax=max(df["close"]),
+        linestyle="--",
+        alpha=0.35,
+        color="blue",
+    )
 
-    axarr[0].plot(df['s_up'], label='Lowerbound', alpha=0.35)
-    axarr[0].plot(df['s_dn'], label='Upperbound', alpha=0.35)
+    axarr[0].plot(df["s_up"], label="Lowerbound", alpha=0.35)
+    axarr[0].plot(df["s_dn"], label="Upperbound", alpha=0.35)
     if signals is not None:
         add_buy_sell_signals(axarr[0], df, signals)
 
     # plt.xticks(rotation=45)
     # plt.ylabel('Price')
-    axarr[0].legend(loc='upper left')
+    axarr[0].legend(loc="upper left")
 
-    axarr[1].plot(df['trend'], label='trend', color='red')
-    axarr[1].legend(loc='upper left')
+    axarr[1].plot(df["trend"], label="trend", color="red")
+    axarr[1].legend(loc="upper left")
     # plt.xticks(rotation=45)
     # plt.xlabel('Time')
 
 
 def plot_rvwma(df, signals=None, start=500):
     plt.figure(figsize=(16, 4.5))
-    plt.plot(df['rvwma'], label='rvwma', alpha=0.35)
-    plt.plot(df['wma'], label='wma', alpha=0.35)
-    plt.plot(df['close'], label='close', alpha=0.35)
-    plt.vlines(x=start, ymin=min(df['close']), ymax=max(
-        df['close']), linestyle='--', alpha=0.35, color='blue')
+    plt.plot(df["rvwma"], label="rvwma", alpha=0.35)
+    plt.plot(df["wma"], label="wma", alpha=0.35)
+    plt.plot(df["close"], label="close", alpha=0.35)
+    plt.vlines(
+        x=start,
+        ymin=min(df["close"]),
+        ymax=max(df["close"]),
+        linestyle="--",
+        alpha=0.35,
+        color="blue",
+    )
 
     if signals is not None:
         add_buy_sell_signals(plt, df, signals)
 
-    plt.title('RVWMA Strategy')
-    plt.xlabel('Time')
+    plt.title("RVWMA Strategy")
+    plt.xlabel("Time")
     plt.xticks(rotation=45)
-    plt.ylabel('Price')
-    plt.legend(loc='upper left')
+    plt.ylabel("Price")
+    plt.legend(loc="upper left")
 
 
 def plot_macd(df, signals=None, start=500):
-    f, axarr = plt.subplots(2, sharex=True, figsize=(
-        16, 10), gridspec_kw={'height_ratios': [3, 1]})
+    f, axarr = plt.subplots(
+        2, sharex=True, figsize=(16, 10), gridspec_kw={"height_ratios": [3, 1]}
+    )
     f.subplots_adjust(hspace=0)
-    axarr[0].plot(df['close'], alpha=0.35)
-    axarr[0].vlines(x=start, ymin=min(df['close']), ymax=max(
-        df['close']), linestyle='--', alpha=0.35, color='blue')
+    axarr[0].plot(df["close"], alpha=0.35)
+    axarr[0].vlines(
+        x=start,
+        ymin=min(df["close"]),
+        ymax=max(df["close"]),
+        linestyle="--",
+        alpha=0.35,
+        color="blue",
+    )
     if signals is not None:
         add_buy_sell_signals(axarr[0], df, signals)
 
-    #axarr[1].plot(TA.KST(df), alpha=0.5)
-    axarr[1].plot(df.index, df['MACD'], label='MACD', color='red')
-    axarr[1].plot(df.index, df['Signal'], label='Signal',
-                  color='blue', alpha=0.35)
+    # axarr[1].plot(TA.KST(df), alpha=0.5)
+    axarr[1].plot(df.index, df["MACD"], label="MACD", color="red")
+    axarr[1].plot(df.index, df["Signal"], label="Signal", color="blue", alpha=0.35)
 
     # plt.title('MACD Strategy')
     # axarr[0].ylabel('Price')
@@ -331,33 +413,46 @@ def plot_macd(df, signals=None, start=500):
 
 def plot_hma(df, signals=None, start=500):
     plt.figure(figsize=(16, 4.5))
-    plt.plot(df['hma_fast'], label='hma_fast', alpha=0.35)
-    plt.plot(df['hma_slow'], label='hma_slow', alpha=0.35)
-    plt.plot(df['close'], label='close', alpha=0.35)
-    plt.vlines(x=start, ymin=min(df['close']), ymax=max(
-        df['close']), linestyle='--', alpha=0.35, color='blue')
+    plt.plot(df["hma_fast"], label="hma_fast", alpha=0.35)
+    plt.plot(df["hma_slow"], label="hma_slow", alpha=0.35)
+    plt.plot(df["close"], label="close", alpha=0.35)
+    plt.vlines(
+        x=start,
+        ymin=min(df["close"]),
+        ymax=max(df["close"]),
+        linestyle="--",
+        alpha=0.35,
+        color="blue",
+    )
     if signals is not None:
         add_buy_sell_signals(plt, df, signals)
 
-    plt.title('HMA Strategy')
-    plt.xlabel('Time')
+    plt.title("HMA Strategy")
+    plt.xlabel("Time")
     plt.xticks(rotation=45)
-    plt.ylabel('Price')
-    plt.legend(loc='upper left')
+    plt.ylabel("Price")
+    plt.legend(loc="upper left")
 
 
 def plot_kagi(df, signals=None, start=500):
     plt.figure(figsize=(16, 4.5))
-    plt.plot(df['kagi'], label='kagi', alpha=0.35)
-    plt.plot(df['wma'], label='wma', alpha=0.35)
-    plt.plot(df['close'], label='close', alpha=0.35)
-    plt.vlines(x=start, ymin=min(df['close']), ymax=max(
-        df['close']), linestyle='--', alpha=0.35, color='blue')
+    plt.plot(df["kagi"], label="kagi", alpha=0.35)
+    plt.plot(df["wma"], label="wma", alpha=0.35)
+    plt.plot(df["close"], label="close", alpha=0.35)
+    plt.vlines(
+        x=start,
+        ymin=min(df["close"]),
+        ymax=max(df["close"]),
+        linestyle="--",
+        alpha=0.35,
+        color="blue",
+    )
     if signals is not None:
         add_buy_sell_signals(plt, df, signals)
 
     # plt.title('KAGI Strategy')
-    plt.xlabel('Time')
+    plt.xlabel("Time")
     plt.xticks(rotation=45)
-    plt.ylabel('Price')
-    plt.legend(loc='upper left')
+    plt.ylabel("Price")
+    plt.legend(loc="upper left")
+
