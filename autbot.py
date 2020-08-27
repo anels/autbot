@@ -228,7 +228,7 @@ def scan(account_info="accounts.yaml", config="config_rt_bot.yaml"):
                         )
 
                     logging.info(transcation_record)
-                    info_str += "{}!\n".format(transcation_record)
+                    info_str += f"{transcation_record}!\n"
 
                     if enable_robinhood:
                         receipt_str += f"{receipt_ex}\n"
@@ -263,7 +263,7 @@ def scan(account_info="accounts.yaml", config="config_rt_bot.yaml"):
 
                 body_text = info_str
                 if enable_robinhood:
-                    body_text += f"\n\nRobinhood Receipt:\n{receipt_str }"
+                    body_text += f"\n\nRobinhood Receipt:\n{receipt_str}"
 
                 send_email(
                     header,
@@ -275,7 +275,7 @@ def scan(account_info="accounts.yaml", config="config_rt_bot.yaml"):
 
             if len(hold_list) > 0:
                 hold_list_str = ", ".join(hold_list)
-                print("HOLD: {}".format(hold_list_str))
+                print(f"HOLD: {hold_list_str}")
 
             time.sleep(refresh_interval)
 
@@ -289,11 +289,11 @@ def main(argv):
     try:
         opts, args = getopt.getopt(argv, "ha:c:", ["account_info=", "config="])
     except getopt.GetoptError:
-        print("Option error, please try again.\n{}".format(usage_msg))
+        print(f"Option error, please try again.\n{usage_msg}")
         sys.exit(2)
     for opt, arg in opts:
         if opt == "-h":
-            print("Help.\n{}".format(usage_msg))
+            print(f"Help.\n{usage_msg}")
             sys.exit()
         elif opt in ("-a", "--account_info"):
             account_info_file = arg
@@ -301,14 +301,14 @@ def main(argv):
             config_file = arg
 
     if account_info_file == "":
-        print("Account Info is missing, please try again.\n{}".format(usage_msg))
+        print(f"Account Info is missing, please try again.\n{usage_msg}")
         sys.exit(2)
     if config_file == "":
-        print("Config file is missing, please try again.\n{}".format(usage_msg))
+        print(f"Config file is missing, please try again.\n{usage_msg}")
         sys.exit(2)
 
-    print('account_info file is "{}"'.format(account_info_file))
-    print('config_file is "{}"'.format(config_file))
+    print(f'account_info file is "{account_info_file}"')
+    print(f'config_file is "{config_file}"')
 
     scan(account_info=account_info_file, config=config_file)
 
