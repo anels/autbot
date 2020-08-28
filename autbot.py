@@ -61,6 +61,7 @@ def scan(account_info="accounts.yaml", config="config_rt_bot.yaml"):
     history_file = config["history_file"]
     log_file = config["log_file"]
     refresh_interval = config["refresh"]
+    data_granularity = config["interval"]
     enable_sound = config["enable_sound"] if "enable_sound" in config else False
 
     toaddr = config["email_receivers"]
@@ -144,15 +145,13 @@ def scan(account_info="accounts.yaml", config="config_rt_bot.yaml"):
             info_str = ""
             receipt_str = ""
 
-            try:
-                dfs, _ = mass_refresh(
-                    ticker_list, period="5d", interval=config["interval"]
-                )
-            except Exception:
-                logging.warn("Exception in mass_refresh: ", exc_info=True)
-                break
-
-            for ticker in ticker_list:
+            for i, ticker in enumerate(ticker_list):
+                # batch download
+                if i % 5 == 0:
+                    batch_list = ticker_list[i : i + 5]
+                    dfs, _ = mass_refresh(
+                        batch_list, period="5d", interval=data_granularity,
+                    )
                 df = dfs[ticker]
                 close_price = df.iloc[-1]["close"]
 
