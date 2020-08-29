@@ -88,9 +88,7 @@ def scan(account_info="accounts.yaml", config="config_rt_bot.yaml"):
     if enable_robinhood:
         login = r.login(robinhood_username, robinhood_password)
         logging.info(
-            "Robinhood Login: {}, the token will be expired in {} seconds.".format(
-                login["detail"], login["expires_in"]
-            )
+            f"Robinhood Login: {login['detail']}, the token will be expired in {login['expires_in']} seconds."
         )
 
     strategy = get_strategy(strategy_name)
@@ -218,13 +216,11 @@ def scan(account_info="accounts.yaml", config="config_rt_bot.yaml"):
                             playsound("resources/coin.mp3")
 
                     if email_mode == "reminder":
-                        transcation_record = "{} {} @ {:.2f}".format(
-                            sign.upper(), ticker, close_price
+                        transcation_record = (
+                            f"{sign.upper()} {ticker} @ {close_price:.2f}"
                         )
                     else:
-                        transcation_record = "{} {} {} @ {:.2f}".format(
-                            sign.upper(), transaction_num, ticker, close_price
-                        )
+                        transcation_record = f"{sign.upper()} {transaction_num} {ticker} @ {close_price:.2f}"
 
                     logging.info(transcation_record)
                     info_str += f"{transcation_record}!\n"

@@ -12,14 +12,14 @@ def timeit(func):
         elapsed_time = (time.time_ns() - t) / (10 ** 9)
         print(f"{func.__name__} finished in {elapsed_time:.6f} secs.")
         return result
+
     return inner
 
 
 def update_trade_history(symbol, operation, amount, price, file_name):
-    with open(file_name, 'a+') as log_file:
+    with open(file_name, "a+") as log_file:
         current_time = str(pd.Timestamp("now"))
-        log_file.write("{},{},{},{},{:.2f}\n".format(current_time,
-                                                     operation, amount, symbol, price))
+        log_file.write(f"{current_time},{operation},{amount},{symbol},{price:.2f}\n")
 
 
 def send_email(subject, message, receiver_list, sender_username, sender_password):
@@ -30,14 +30,14 @@ def send_email(subject, message, receiver_list, sender_username, sender_password
     cc = []
     bcc = []
 
-    msg = MIMEText(body, _charset='utf-8')
-    msg['From'] = fromaddr
-    msg['To'] = ', '.join(toaddr)
-    msg['Cc'] = ', '.join(cc)
-    msg['Bcc'] = ', '.join(bcc)
-    msg['Subject'] = subject
+    msg = MIMEText(body, _charset="utf-8")
+    msg["From"] = fromaddr
+    msg["To"] = ", ".join(toaddr)
+    msg["Cc"] = ", ".join(cc)
+    msg["Bcc"] = ", ".join(bcc)
+    msg["Subject"] = subject
 
     with smtplib.SMTP("smtp.gmail.com", 587) as server:
         server.starttls()
         server.login(sender_username, sender_password)
-        server.sendmail(fromaddr, (toaddr+cc+bcc), msg.as_bytes())
+        server.sendmail(fromaddr, (toaddr + cc + bcc), msg.as_bytes())
