@@ -3,19 +3,19 @@
 This bot automatically retrieves stock data from yahoo finance and using one of the strategy to decide buy or sell. If you config your robinhood account. It can automatically place order on robinhood.
 
 ## Download
+
 Please go to Release section to get the latest release or clone this repo.
 
 ## Installation
 
 Step 1.
 
+Download the latest release from release tab or clone this repo.
+
+Step 2. (Optional)
+
 ```
 virtualenv .
-```
-
-Step 2.
-
-```
 Scripts\activate
 ```
 
@@ -45,7 +45,11 @@ main_runner.py "autbot.py -a <account_info_file> -c <config_file>"
 
 ## Test & Benchmark Strategies
 
-Start jupyter notebook and run `strategy_benchmark`.
+Start jupyter notebook and run `strategy_benchmark.ipynb`.
+
+## Recap Trade History
+
+Start jupyter notebook and run `recap.ipynb`.
 
 ## Disclaimer
 
