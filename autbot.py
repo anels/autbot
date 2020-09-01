@@ -8,6 +8,7 @@ import math
 import sys
 import pandas as pd
 import robin_stocks as r
+from pathlib import Path
 from datetime import datetime, timedelta
 from data_preparation import *
 from misc import *
@@ -73,9 +74,9 @@ def scan(account_info="accounts.yaml", config="config_rt_bot.yaml"):
     strategy_name = config["strategy"]
     strategy_params = config["strategy_params"]
 
-    os.makedirs(os.path.dirname(status_file), exist_ok=True)
-    os.makedirs(os.path.dirname(history_file), exist_ok=True)
-    os.makedirs(os.path.dirname(log_file), exist_ok=True)
+    Path(os.path.dirname(status_file)).mkdir(parents=True, exist_ok=True)
+    Path(os.path.dirname(history_file)).mkdir(parents=True, exist_ok=True)
+    Path(os.path.dirname(log_file)).mkdir(parents=True, exist_ok=True)
 
     logging.basicConfig(
         filename=log_file,
