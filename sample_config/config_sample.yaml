@@ -38,3 +38,10 @@ watch_list:
   - MSFT
   - AMD
   - INTC
+  - GOOGL
+
+
+  # ticker strategy
+ticker_strategy:
+  INTC: [supertrend, 5, 377]
+  GOOGL: [rvwma, 55, 145]

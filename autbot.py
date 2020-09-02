@@ -71,6 +71,7 @@ def scan(account_info="accounts.yaml", config="config_rt_bot.yaml"):
     init_balance = config["init_balance"]
     enable_robinhood = config["enable_robinhood"]
     ticker_list = config["watch_list"]
+    ticker_strategy = config["ticker_strategy"] if "ticker_strategy" in config else None
     strategy_name = config["strategy"]
     strategy_params = config["strategy_params"]
 
@@ -154,12 +155,23 @@ def scan(account_info="accounts.yaml", config="config_rt_bot.yaml"):
                 df = dfs[ticker]
                 close_price = df.iloc[-1]["close"]
 
-                df = strategy.prep_data(
-                    df, float(strategy_params[0]), float(strategy_params[1])
-                )
-                sign = strategy.sell_or_buy(
-                    df, len(df) - 1, status_list[ticker]["status"]
-                )
+                if ticker_strategy and ticker in ticker_strategy.keys():
+                    t_strategy = get_strategy(ticker_strategy[ticker][0])
+                    df = t_strategy.prep_data(
+                        df,
+                        float(ticker_strategy[ticker][1]),
+                        float(ticker_strategy[ticker][2]),
+                    )
+                    sign = t_strategy.sell_or_buy(
+                        df, len(df) - 1, status_list[ticker]["status"]
+                    )
+                else:
+                    df = strategy.prep_data(
+                        df, float(strategy_params[0]), float(strategy_params[1])
+                    )
+                    sign = strategy.sell_or_buy(
+                        df, len(df) - 1, status_list[ticker]["status"]
+                    )
 
                 if sign != "hold":
                     trade_list.append(ticker)
