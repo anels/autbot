@@ -145,6 +145,7 @@ def scan(account_info="accounts.yaml", config="config_rt_bot.yaml"):
             info_str = ""
             receipt_str = ""
 
+            t = time.process_time()
             for i, ticker in enumerate(ticker_list):
                 # batch download
                 if i % 5 == 0:
@@ -284,6 +285,9 @@ def scan(account_info="accounts.yaml", config="config_rt_bot.yaml"):
             if len(hold_list) > 0:
                 hold_list_str = ", ".join(hold_list)
                 print(f"HOLD: {hold_list_str}")
+
+            elapsed_time = time.process_time() - t
+            print("Total Running Time: {:.2f} second.".format(elapsed_time))
 
             time.sleep(refresh_interval)
 
