@@ -70,10 +70,18 @@ def scan(account_info="accounts.yaml", config="config_rt_bot.yaml"):
     email_mode = config["email_mode"] if "email_mode" in config else "reminder"
     init_balance = config["init_balance"]
     enable_robinhood = config["enable_robinhood"]
-    ticker_list = config["watch_list"]
-    ticker_strategy = config["ticker_strategy"] if "ticker_strategy" in config else None
     strategy_name = config["strategy"]
     strategy_params = config["strategy_params"]
+    ticker_strategy = config["ticker_strategy"] if "ticker_strategy" in config else None
+    ticker_list = (
+        list(ticker_strategy.keys())
+        if ticker_strategy
+        else config["watch_list"]
+        if "watch_list" in config
+        else None
+    )
+    if not ticker_list or len(ticker_list) == 0:
+        raise Exception("Watchlist is empty.")
 
     Path(os.path.dirname(status_file)).mkdir(parents=True, exist_ok=True)
     Path(os.path.dirname(history_file)).mkdir(parents=True, exist_ok=True)
@@ -132,7 +140,9 @@ def scan(account_info="accounts.yaml", config="config_rt_bot.yaml"):
         if (
             now.hour >= 13 or now.hour < 6
         ):  # for PST, if you are in EST change it to 16 and 9
-            next_wake_time = now + timedelta(days=1)
+            next_wake_time = now
+            if now.hour > 13:
+                next_wake_time += timedelta(days=1)
             next_wake_time = next_wake_time.replace(hour=6, minute=00, second=0)
             delta = next_wake_time - now
             logging.info(f"Go to sleep now, will wake up at {next_wake_time}...")
@@ -156,7 +166,7 @@ def scan(account_info="accounts.yaml", config="config_rt_bot.yaml"):
                 df = dfs[ticker]
                 close_price = df.iloc[-1]["close"]
 
-                if ticker_strategy and ticker in ticker_strategy.keys():
+                if ticker_strategy and ticker_strategy[ticker]:
                     t_strategy = get_strategy(ticker_strategy[ticker][0])
                     df = t_strategy.prep_data(
                         df,
