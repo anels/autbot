@@ -192,25 +192,27 @@ def scan(account_info="accounts.yaml", config="config_rt_bot.yaml"):
                         transaction_num = math.floor(
                             status_list[ticker]["balance_cash"] * 0.95 / close_price
                         )
+                        if transaction_num > 0:
+                            if enable_robinhood:
+                                # get user profile
+                                account_data = r.load_account_profile()
+                                cash = float(
+                                    account_data.get("unsettled_funds")
+                                ) + float(account_data.get("cash"))
 
-                        if enable_robinhood:
-                            # get user profile
-                            account_data = r.load_account_profile()
-                            cash = float(account_data.get("unsettled_funds")) + float(
-                                account_data.get("cash")
-                            )
-
-                            if cash > transaction_num * close_price:
-                                r_receipt = r.order_buy_market(
-                                    ticker, transaction_num, extendedHours=True
-                                )
-                                close_price = float(r_receipt["price"])
-                                receipt_ex = format_robinhood_trade_receipt(
-                                    ticker, r_receipt
-                                )
-                            else:
-                                logging.info("Insufficient Cash! - {}".format(cash))
-                                return
+                                if cash > transaction_num * close_price:
+                                    r_receipt = r.order_buy_market(
+                                        ticker, transaction_num, extendedHours=True
+                                    )
+                                    close_price = float(r_receipt["price"])
+                                    receipt_ex = format_robinhood_trade_receipt(
+                                        ticker, r_receipt
+                                    )
+                                else:
+                                    logging.info("Insufficient Cash! - {}".format(cash))
+                                    return
+                        else:
+                            logging.info("Insufficient Budget! - {}".format(cash))
 
                         status_list[ticker]["holding_num"] += transaction_num
                         status_list[ticker]["balance_cash"] -= (

@@ -267,7 +267,7 @@ def run_strategy(tickers, param_a, param_b, period, interval, strategy, plot_fig
     avg_b = total_b * 100.0 / len(tickers)
     avg_w = total_w / len(tickers)
 
-    win_coordinates = np.where(total_b > 0.75)
+    win_coordinates = np.where(total_b > 0.60)
 
     if len(win_coordinates[0]) == 0:
         max_result = np.max(total_p)
@@ -286,13 +286,14 @@ def run_strategy(tickers, param_a, param_b, period, interval, strategy, plot_fig
         for w in win_idxes:
             win_picks.append([w[0], w[1], total_p[w[0]][w[1]]])
 
+        win_picks = [pick for pick in win_picks if pick[2] > 1.0]
         win_picks.sort(reverse=True, key=lambda i: i[2])
 
         for i in range(0, min(len(win_picks), 5)):
             print(
-                "  The #{} config for {} is ({}, {}) profit margin is {:.4f}%.".format(
+                "  The #{} config is ({}, {}, {}) profit margin is {:.4f}%.".format(
                     i + 1,
-                    strategy.__name__,
+                    strategy.get_strategy_name(),
                     param_a[win_picks[i][0]],
                     param_b[win_picks[i][1]],
                     win_picks[i][2],
@@ -300,9 +301,13 @@ def run_strategy(tickers, param_a, param_b, period, interval, strategy, plot_fig
             )
 
     if plot_fig:
-        plot_heatmap(total_p, f"Profit of {strategy.__name__}", param_a, param_b)
-        # plot_heatmap(avg_b, f"Beat % of {strategy.__name__}", param_a, param_b)
-        plot_heatmap(avg_w, f"Win % of {strategy.__name__}", param_a, param_b)
+        plot_heatmap(
+            total_p, f"Profit of {strategy.get_strategy_name()}", param_a, param_b
+        )
+        # plot_heatmap(avg_b, f"Beat % of {strategy.get_strategy_name()}", param_a, param_b)
+        plot_heatmap(
+            avg_w, f"Win % of {strategy.get_strategy_name()}", param_a, param_b
+        )
 
 
 def add_buy_sell_signals(plt, df, signals):

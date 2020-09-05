@@ -2,13 +2,17 @@ import numpy as np
 from finta import TA
 
 
+def get_strategy_name():
+    return "kagi"
+
+
 def prep_data(df, reversal=0.02, period=13):
     reversal = float(reversal)
     period = int(period)
 
     df = df.copy()
-    df['kagi'] = getKagi(df['close'], reversal)
-    df['wma'] = TA.WMA(df, period, 'close')
+    df["kagi"] = getKagi(df["close"], reversal)
+    df["wma"] = TA.WMA(df, period, "close")
     return df
 
 
@@ -26,7 +30,7 @@ def getKagi(df, reversal):
                 look_back += 1
             else:
                 for j in range(0, look_back):
-                    kagi[i-j-1] = curr_val
+                    kagi[i - j - 1] = curr_val
 
                 curr_val = df[i]
                 direction = 1
@@ -37,14 +41,14 @@ def getKagi(df, reversal):
                 look_back += 1
             else:
                 for j in range(0, look_back):
-                    kagi[i-j-1] = curr_val
+                    kagi[i - j - 1] = curr_val
 
                 curr_val = df[i]
                 direction = 0
                 look_back = 1
 
     for j in range(0, look_back):
-        kagi[len(df)-j-1] = curr_val
+        kagi[len(df) - j - 1] = curr_val
 
     return kagi
 
@@ -52,7 +56,7 @@ def getKagi(df, reversal):
 def buy_signal_kagi(df, i):
     if i == 0:
         return False
-    if df['wma'][i] <= df['kagi'][i] and df['wma'][i-1] > df['kagi'][i-1]:
+    if df["wma"][i] <= df["kagi"][i] and df["wma"][i - 1] > df["kagi"][i - 1]:
         return True
     else:
         return False
@@ -61,7 +65,7 @@ def buy_signal_kagi(df, i):
 def sell_signal_kagi(df, i):
     if i == 0:
         return False
-    if df['wma'][i] >= df['kagi'][i] and df['wma'][i-1] < df['kagi'][i-1]:
+    if df["wma"][i] >= df["kagi"][i] and df["wma"][i - 1] < df["kagi"][i - 1]:
         return True
     else:
         return False
@@ -69,14 +73,18 @@ def sell_signal_kagi(df, i):
 
 def sell_or_buy(df, i, status):
     if status == 0:
-        if buy_signal_kagi(df, i) or (buy_signal_kagi(df, i-1) and df['wma'][i] <= df['kagi'][i]):
-            return 'buy'
+        if buy_signal_kagi(df, i) or (
+            buy_signal_kagi(df, i - 1) and df["wma"][i] <= df["kagi"][i]
+        ):
+            return "buy"
         else:
-            return 'hold'
+            return "hold"
     elif status == 1:
-        if sell_signal_kagi(df, i) or (sell_signal_kagi(df, i-1) and df['wma'][i] >= df['kagi'][i]):
-            return 'sell'
+        if sell_signal_kagi(df, i) or (
+            sell_signal_kagi(df, i - 1) and df["wma"][i] >= df["kagi"][i]
+        ):
+            return "sell"
         else:
-            return 'hold'
+            return "hold"
     else:
-        return 'hold'
+        return "hold"
