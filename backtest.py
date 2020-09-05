@@ -35,7 +35,7 @@ def test(init_balance, df, strategy, output="oneline", verbose=False):
     balance = init_balance
     holdings = 0
 
-    a = buy_sell(df, strategy)
+        a = buy_sell(df, strategy)
     df["Buy_Signal_price"] = a[0]
     df["Sell_Signal_price"] = a[1]
 
@@ -79,6 +79,8 @@ def test(init_balance, df, strategy, output="oneline", verbose=False):
                 )
             holdings = 0
 
+    num_trade = len(trade_history)
+
     num_win = 0
     total_win = 0
     max_win = 0
@@ -88,7 +90,7 @@ def test(init_balance, df, strategy, output="oneline", verbose=False):
     total_duration = 0
     max_duration, min_duration = 0, len(df)
 
-    for i in range(0, len(trade_history)):
+    for i in range(num_trade):
         curr_trade = trade_history[i]
         if curr_trade["profit"] > 0:
             num_win += 1
@@ -112,46 +114,44 @@ def test(init_balance, df, strategy, output="oneline", verbose=False):
 
     final_balance = balance + holdings * df.iloc[-1]["close"]
     final_profit = float(final_balance - init_balance) / init_balance * 100
-    win_rate = (
-        float(num_win / len(trade_history)) * 100 if len(trade_history) > 0 else 0.0
-    )
+    win_rate = float(num_win / num_trade) * 100 if num_trade > 0 else 0.0
 
     if output == "oneline":
-        if len(trade_history) > 0:
+        if num_trade > 0:
             print(
                 "Balance: {0:.2f} (Profit:{1:.2f}%, # of Trade:{2}, Win:{3:.2f}%, avg: win {4:.2f}% / lose {5:.2f}%)".format(
                     final_balance,
                     final_profit,
-                    len(trade_history),
+                    num_trade,
                     win_rate,
-                    total_win / len(trade_history) * 100,
-                    total_lose / len(trade_history) * 100,
+                    total_win / num_trade * 100,
+                    total_lose / num_trade * 100,
                 )
             )
         else:
             print(
                 "Balance: {0: .2f} (Profit:{1: .2f}%, # of Trade:{2})".format(
-                    final_balance, final_profit, len(trade_history)
+                    final_balance, final_profit, num_trade
                 )
             )
 
-    elif output == "report" and len(trade_history) > 0:
-        print("Total # of Trades: {}".format(len(trade_history)))
+    elif output == "report" and num_trade > 0:
+        print("Total # of Trades: {}".format(num_trade))
         print("# Wins: {}".format(num_win))
         print("Max Win: {}%".format(max_win * 100))
         print("Win Rate: {}%".format(win_rate))
         print("# Loses: {}".format(num_lose))
         print("Max Lose: {}%".format(max_lose * 100))
-        print("Avg Lose: {}%".format(total_lose / len(trade_history) * 100))
+        print("Avg Lose: {}%".format(total_lose / num_trade * 100))
         print("Max Duration: {}".format(max_duration))
         print("Min Duration: {}".format(min_duration))
-        print("Avg Duration: {}".format(total_duration / len(trade_history)))
+        print("Avg Duration: {}".format(total_duration / num_trade))
 
-    if verbose:
-        for i in range(0, len(trade_history)):
-            print(trade_history[i])
+    # if verbose:
+    #    for i in range(0, len(trade_history)):
+    #        print(trade_history[i])
 
-    return (final_profit, win_rate)
+    return (final_profit, win_rate, num_trade)
 
 
 def buy_n_hold(init_balance, df, start=500, output="oneline"):
@@ -202,7 +202,7 @@ def plot_heatmap(test_result, title, x_label, y_label):
     plt.show()
 
 
-@timeit
+# @timeit
 def run_benchmark(
     tickers, param_a, param_b, period, interval, strategy, init_balance=10000
 ):
@@ -210,25 +210,26 @@ def run_benchmark(
     profit_results = []
     winrate_results = []
     beat_results = []
-
-    print("Running Benchmark for {}...".format(strategy.__name__))
+    tardenum_results = []
+    print("Running Benchmark for {}...".format(strategy.get_strategy_name()))
     for idx, ticker in enumerate(tickers):
         print(
             f">> Testing {ticker: <8} ... {(idx)/len(tickers)*100.0:6.2f}% ({idx}/{len(tickers)})",
             end="\r",
         )
-
         df, last_update = refresh(ticker, period, interval)
         bnh = buy_n_hold(init_balance, df, output="None")
 
         p_result = []
         w_result = []
         b_result = []
+        t_result = []
 
         for i in param_a:
             p_result_i = []
             w_result_i = []
             b_result_i = []
+            t_result_i = []
             for j in param_b:
                 df_test = strategy.prep_data(df, i, j)
                 # print ("{},{} => ".format(i, j), end='')
@@ -238,66 +239,92 @@ def run_benchmark(
                 p_result_i.append(test_result[0] - bnh)
                 w_result_i.append(test_result[1])
                 b_result_i.append(1 if test_result[0] - bnh > 0 else 0)
+                t_result_i.append(test_result[2])
             p_result.append(p_result_i)
             w_result.append(w_result_i)
             b_result.append(b_result_i)
+            t_result.append(t_result_i)
         profit_results.append(p_result)
         winrate_results.append(w_result)
         beat_results.append(b_result)
+        tardenum_results.append(t_result)
 
         print(
             " " * 80, end="\r",
         )
 
-    return (profit_results, winrate_results, beat_results)
+    return (profit_results, winrate_results, beat_results, tardenum_results)
 
 
 def run_strategy(tickers, param_a, param_b, period, interval, strategy, plot_fig=False):
-    (p_results, w_results, b_results) = run_benchmark(
+    (p_results, w_results, b_results, t_results) = run_benchmark(
         tickers, param_a, param_b, period, interval, strategy
     )
 
-    total_p = np.zeros_like(p_results[0])
-    total_b = np.zeros_like(b_results[0])
-    total_w = np.zeros_like(w_results[0])
+    total_p = np.zeros_like(p_results[0])  # total profit
+    total_b = np.zeros_like(b_results[0])  # total beat (bnh)
+    total_w = np.zeros_like(w_results[0])  # total win rates of trades
+    total_t = np.zeros_like(t_results[0])  # total number of transactions
     for i in range(len(tickers)):
         total_p = np.add(p_results[i], total_p)
         total_b = np.add(b_results[i], total_b)
         total_w = np.add(w_results[i], total_w)
+        total_t = np.add(t_results[i], total_t)
     avg_b = total_b * 100.0 / len(tickers)
     avg_w = total_w / len(tickers)
+    avg_t = total_t / len(tickers)
 
-    win_coordinates = np.where(total_b > 0.60)
+    win_coordinates = np.where(
+        total_b > 0.60
+    )  # for multiple tickers, make sure at least 60% are beat buy and hold
+
+    res = []
 
     if len(win_coordinates[0]) == 0:
         max_result = np.max(total_p)
         max_idxes = np.unravel_index(np.argmax(total_p, axis=None), total_p.shape)
-        print(
-            "The best config for {} is ({}, {}) profit margin is {}%.".format(
-                strategy.__name__,
-                param_a[max_idxes[0]],
-                param_b[max_idxes[1]],
-                max_result,
-            )
-        )
+        # print(
+        #    "The best config for {} is ({}, {}) profit margin is {}%.".format(
+        #        strategy.__name__,
+        #        param_a[max_idxes[0]],
+        #        param_b[max_idxes[1]],
+        #        max_result,
+        #    )
+        # )
     else:
         win_idxes = list(zip(win_coordinates[0], win_coordinates[1]))
         win_picks = []
         for w in win_idxes:
-            win_picks.append([w[0], w[1], total_p[w[0]][w[1]]])
+            win_picks.append([w[0], w[1], total_p[w[0]][w[1]], avg_t[w[0]][w[1]]])
 
-        win_picks = [pick for pick in win_picks if pick[2] > 1.0]
+        # win_picks = [pick for pick in win_picks if pick[2] > 1.0]
         win_picks.sort(reverse=True, key=lambda i: i[2])
 
-        for i in range(0, min(len(win_picks), 5)):
-            print(
-                "  The #{} config is ({}, {}, {}) profit margin is {:.4f}%.".format(
-                    i + 1,
-                    strategy.get_strategy_name(),
-                    param_a[win_picks[i][0]],
-                    param_b[win_picks[i][1]],
+        num_res = min(len(win_picks), 16)
+
+        # print(f"  Find {num_res} winning params.")
+
+        for i in range(num_res):
+            # print(
+            #     "  The #{} config is ({}, {}, {}) profit margin is {:.4f}%. # of Trade is {}".format(
+            #         i + 1,
+            #         strategy.get_strategy_name(),
+            #         param_a[win_picks[i][0]],
+            #         param_b[win_picks[i][1]],
+            #         win_picks[i][2],
+            #         win_picks[i][3],
+            #     )
+            # )
+            res.append(
+                [
+                    [
+                        strategy.get_strategy_name(),
+                        param_a[win_picks[i][0]],
+                        param_b[win_picks[i][1]],
+                    ],
                     win_picks[i][2],
-                )
+                    win_picks[i][3],
+                ]
             )
 
     if plot_fig:
@@ -308,6 +335,8 @@ def run_strategy(tickers, param_a, param_b, period, interval, strategy, plot_fig
         plot_heatmap(
             avg_w, f"Win % of {strategy.get_strategy_name()}", param_a, param_b
         )
+
+    return res
 
 
 def add_buy_sell_signals(plt, df, signals):
