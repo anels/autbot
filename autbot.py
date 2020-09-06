@@ -150,6 +150,24 @@ def scan(account_info="accounts.yaml", config="config_rt_bot.yaml"):
                 playsound("resources/snoring.mp3")
             time.sleep(delta.seconds)
         else:
+            if enable_robinhood:
+                account_data = r.load_account_profile()
+                total_cash = float(account_data.get("unsettled_funds")) + float(
+                    account_data.get("cash")
+                )
+
+                allocated_cash = 0
+                for ticker in ticker_list:
+                    allocated_cash += status_list[ticker]["balance_cash"]
+
+                logging.info(
+                    f"Bot allocated cash: {allocated_cash}, current available cash in your robinhood account is {total_cash}."
+                )
+
+                if total_cash < allocated_cash:
+                    logging.warning("Insufficient fund!")
+                    return
+
             hold_list = []
             trade_list = []
             info_str = ""
@@ -209,18 +227,21 @@ def scan(account_info="accounts.yaml", config="config_rt_bot.yaml"):
                                         ticker, r_receipt
                                     )
                                 else:
-                                    logging.info("Insufficient Cash! - {}".format(cash))
+                                    logging.warning(
+                                        "Insufficient Cash! - {}".format(cash)
+                                    )
                                     return
-                        else:
-                            logging.info("Insufficient Budget! - {}".format(cash))
 
-                        status_list[ticker]["holding_num"] += transaction_num
-                        status_list[ticker]["balance_cash"] -= (
-                            transaction_num * close_price
-                        )
-                        status_list[ticker]["status"] = 1
-                        if enable_sound:
-                            playsound("resources/register.mp3")
+                            status_list[ticker]["holding_num"] += transaction_num
+                            status_list[ticker]["balance_cash"] -= (
+                                transaction_num * close_price
+                            )
+                            status_list[ticker]["status"] = 1
+                            if enable_sound:
+                                playsound("resources/register.mp3")
+                        else:
+                            logging.warning("Insufficient Budget! - {}".format(cash))
+
                     elif sign == "sell":
                         transaction_num = status_list[ticker]["holding_num"]
 
@@ -310,6 +331,7 @@ def main(argv):
 
     account_info_file = ""
     config_file = ""
+
     try:
         opts, args = getopt.getopt(argv, "ha:c:", ["account_info=", "config="])
     except getopt.GetoptError:
