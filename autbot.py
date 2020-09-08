@@ -45,7 +45,7 @@ def get_strategy(strategy_name):
     return strategy
 
 
-def scan(account_info="accounts.yaml", config="config_rt_bot.yaml"):
+def scan(account_info="accounts.yaml", config="config.yaml"):
 
     with open(account_info, "r") as file:
         accounts = yaml.load(file, Loader=yaml.FullLoader)
@@ -288,9 +288,9 @@ def scan(account_info="accounts.yaml", config="config_rt_bot.yaml"):
 
             if len(trade_list) > 0:
                 header = (
-                    f"[TBot][{email_prefix}]"
+                    f"[AuTBot][{email_prefix}]"
                     if email_prefix and email_prefix.strip()
-                    else "[TBot]"
+                    else "[AuTBot]"
                 )
                 if len(trade_list) > 1:
                     trade_list_str = "/".join(trade_list)
