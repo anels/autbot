@@ -20,6 +20,8 @@ def prep_data(df, multiplier=3, atr_period=50):
     df["s_dn"] = s_dn(df)
     df["trend"] = get_trend(df)
 
+    df["last_signal"] = calcLastSignal(df, atr_period)
+
     return df
 
 
@@ -79,10 +81,26 @@ def sell_signal_st(df, i):
         return False
 
 
+def calcLastSignal(df, initialOffset):
+    last_signal = [(np.nan, np.nan)] * len(df)
+    last_buy, last_sell = 0, 0
+
+    for i in range(initialOffset + 1, len(df)):
+        if buy_signal_st(df, i):
+            last_buy = i
+        elif sell_signal_st(df, i):
+            last_sell = i
+
+        last_signal[i] = (last_buy, last_sell)
+
+    return last_signal
+
+
 def sell_or_buy(df, i, status):
-    if status == 0 and buy_signal_st(df, i):
+    last_sign = "buy" if df["last_signal"][i][0] > df["last_signal"][i][1] else "sell"
+    if status == 0 and last_sign == "buy":
         return "buy"
-    elif status == 1 and sell_signal_st(df, i):
+    elif status == 1 and last_sign == "sell":
         return "sell"
     else:
         return "hold"

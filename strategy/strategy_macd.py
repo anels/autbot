@@ -17,6 +17,8 @@ def prep_data(df, fast_period=12, slow_period=24):
     signal = MACD.ewm(span=9, adjust=False).mean()
     df["MACD"] = MACD
     df["Signal"] = signal
+
+    df["last_signal"] = calcLastSignal(df, slow_period)
     return df
 
 
@@ -38,10 +40,26 @@ def sell_signal_macd(df, i):
         return False
 
 
+def calcLastSignal(df, initialOffset):
+    last_signal = [(np.nan, np.nan)] * len(df)
+    last_buy, last_sell = 0, 0
+
+    for i in range(initialOffset + 1, len(df)):
+        if buy_signal_macd(df, i):
+            last_buy = i
+        elif sell_signal_macd(df, i):
+            last_sell = i
+
+        last_signal[i] = (last_buy, last_sell)
+
+    return last_signal
+
+
 def sell_or_buy(df, i, status):
-    if status == 0 and buy_signal_macd(df, i):
+    last_sign = "buy" if df["last_signal"][i][0] > df["last_signal"][i][1] else "sell"
+    if status == 0 and last_sign == "buy":
         return "buy"
-    elif status == 1 and sell_signal_macd(df, i):
+    elif status == 1 and last_sign == "sell":
         return "sell"
     else:
         return "hold"

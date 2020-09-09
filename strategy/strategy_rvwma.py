@@ -22,6 +22,7 @@ def prep_data(df, rvwma_period=34, wma_period=21):
 
     df["wma"] = TA.WMA(df, wma_period)
     df["rvwma"] = rolling_vwma(df, rvwma_period)
+    df["last_signal"] = calcLastSignal(df, max(wma_period, rvwma_period))
     return df
 
 
@@ -43,10 +44,26 @@ def sell_signal_rvwma(df, i):
         return False
 
 
+def calcLastSignal(df, initialOffset):
+    last_signal = [(np.nan, np.nan)] * len(df)
+    last_buy, last_sell = 0, 0
+
+    for i in range(initialOffset + 1, len(df)):
+        if buy_signal_rvwma(df, i):
+            last_buy = i
+        elif sell_signal_rvwma(df, i):
+            last_sell = i
+
+        last_signal[i] = (last_buy, last_sell)
+
+    return last_signal
+
+
 def sell_or_buy(df, i, status):
-    if status == 0 and buy_signal_rvwma(df, i):
+    last_sign = "buy" if df["last_signal"][i][0] > df["last_signal"][i][1] else "sell"
+    if status == 0 and last_sign == "buy":
         return "buy"
-    elif status == 1 and sell_signal_rvwma(df, i):
+    elif status == 1 and last_sign == "sell":
         return "sell"
     else:
         return "hold"

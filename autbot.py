@@ -27,9 +27,7 @@ def format_robinhood_trade_receipt(ticker, r_receipt):
 
 
 def get_strategy(strategy_name):
-    if strategy_name == "kagi":
-        from strategy import strategy_kagi as strategy
-    elif strategy_name == "wma":
+    if strategy_name == "wma":
         from strategy import strategy_wma as strategy
     elif strategy_name == "macd":
         from strategy import strategy_macd as strategy
