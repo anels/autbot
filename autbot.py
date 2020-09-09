@@ -95,16 +95,20 @@ def scan(account_info="accounts.yaml", config="config.yaml"):
     )
     logging.getLogger().addHandler(logging.StreamHandler(sys.stdout))
 
-    if enable_robinhood:
-        login = r.login(robinhood_username, robinhood_password)
-        logging.info(
-            f"Robinhood Login: {login['detail']}, the token will be expired in {login['expires_in']} seconds."
-        )
-
     strategy = get_strategy(strategy_name)
 
     if enable_sound:
         from playsound import playsound
+
+    if enable_robinhood:
+        login = r.login(robinhood_username, robinhood_password, store_session=False)
+        account_data = r.load_account_profile()
+        total_cash = float(account_data.get("unsettled_funds")) + float(
+            account_data.get("cash")
+        )
+        logging.info(
+            f"Robinhood Login: {login['detail']}, the token will be expired in {login['expires_in']} seconds. Your available cash is {total_cash}"
+        )
 
     if not os.path.exists(status_file):
         print("Status file does not exist!")
@@ -160,12 +164,12 @@ def scan(account_info="accounts.yaml", config="config.yaml"):
                 for ticker in ticker_list:
                     allocated_cash += status_list[ticker]["balance_cash"]
 
-                logging.info(
-                    f"Bot allocated cash: {allocated_cash}, current available cash in your robinhood account is {total_cash}."
-                )
+                logging.info()
 
                 if total_cash < allocated_cash:
-                    logging.warning("Insufficient fund!")
+                    logging.warning(
+                        f"Insufficient fund! Bot allocated cash: {allocated_cash}, current available cash in your robinhood account is {total_cash}."
+                    )
                     return
 
             hold_list = []
