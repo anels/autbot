@@ -7,6 +7,9 @@ def get_strategy_name():
 
 
 def prep_data(df, fast_period=12, slow_period=24):
+    fast_period = int(fast_period)
+    slow_period = int(slow_period)
+
     if fast_period > slow_period:
         fast_period = slow_period
 

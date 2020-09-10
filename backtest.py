@@ -220,30 +220,22 @@ def run_benchmark(
         df, last_update = refresh(ticker, period, interval)
         bnh = buy_n_hold(init_balance, df, output="None")
 
-        p_result = []
-        w_result = []
-        b_result = []
-        t_result = []
+        p_result = [[None] * len(param_b) for i in range(len(param_a))]
+        w_result = [[None] * len(param_b) for i in range(len(param_a))]
+        b_result = [[None] * len(param_b) for i in range(len(param_a))]
+        t_result = [[None] * len(param_b) for i in range(len(param_a))]
 
-        for i in param_a:
-            p_result_i = []
-            w_result_i = []
-            b_result_i = []
-            t_result_i = []
-            for j in param_b:
-                df_test = strategy.prep_data(df, i, j)
+        for i in range(len(param_a)):
+            for j in range(len(param_b)):
+                df_test = strategy.prep_data(df, param_a[i], param_b[j])
                 # print ("{},{} => ".format(i, j), end='')
                 test_result = test(
                     init_balance, df_test, strategy.sell_or_buy, output="None"
                 )
-                p_result_i.append(test_result[0] - bnh)
-                w_result_i.append(test_result[1])
-                b_result_i.append(1 if test_result[0] - bnh > 0 else 0)
-                t_result_i.append(test_result[2])
-            p_result.append(p_result_i)
-            w_result.append(w_result_i)
-            b_result.append(b_result_i)
-            t_result.append(t_result_i)
+                p_result[i][j] = test_result[0] - bnh
+                w_result[i][j] = test_result[1]
+                b_result[i][j] = 1 if test_result[0] - bnh > 0 else 0
+                t_result[i][j] = test_result[2]
         profit_results.append(p_result)
         winrate_results.append(w_result)
         beat_results.append(b_result)
@@ -275,7 +267,7 @@ def run_strategy(tickers, param_a, param_b, period, interval, strategy, plot_fig
     avg_t = total_t / len(tickers)
 
     win_coordinates = np.where(
-        total_b > 0.60
+        (total_b > 0.60) & (total_t > 0)
     )  # for multiple tickers, make sure at least 60% are beat buy and hold
 
     res = []

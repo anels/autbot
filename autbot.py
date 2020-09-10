@@ -181,7 +181,7 @@ def scan(account_info="accounts.yaml", config="config.yaml"):
                 if i % 5 == 0:
                     batch_list = ticker_list[i : i + 5]
                     dfs, _ = mass_refresh(
-                        batch_list, period="5d", interval=data_granularity,
+                        batch_list, period="10d", interval=data_granularity,
                     )
                 df = dfs[ticker]
                 close_price = df.iloc[-1]["close"]
