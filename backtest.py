@@ -35,7 +35,7 @@ def test(init_balance, df, strategy, output="oneline", verbose=False):
     balance = init_balance
     holdings = 0
 
-        a = buy_sell(df, strategy)
+    a = buy_sell(df, strategy)
     df["Buy_Signal_price"] = a[0]
     df["Sell_Signal_price"] = a[1]
 
@@ -202,6 +202,12 @@ def plot_heatmap(test_result, title, x_label, y_label):
     plt.show()
 
 
+def mini_test(df, strategy, i, j, init_balance):
+    df_test = strategy.prep_data(df, i, j)
+    # print ("{},{} => ".format(i, j), end='')
+    return test(init_balance, df_test, strategy.sell_or_buy, output="None")
+
+
 # @timeit
 def run_benchmark(
     tickers, param_a, param_b, period, interval, strategy, init_balance=10000
@@ -227,15 +233,14 @@ def run_benchmark(
 
         for i in range(len(param_a)):
             for j in range(len(param_b)):
-                df_test = strategy.prep_data(df, param_a[i], param_b[j])
-                # print ("{},{} => ".format(i, j), end='')
-                test_result = test(
-                    init_balance, df_test, strategy.sell_or_buy, output="None"
+                test_result = mini_test(
+                    df, strategy, param_a[i], param_b[j], init_balance
                 )
                 p_result[i][j] = test_result[0] - bnh
                 w_result[i][j] = test_result[1]
                 b_result[i][j] = 1 if test_result[0] - bnh > 0 else 0
                 t_result[i][j] = test_result[2]
+
         profit_results.append(p_result)
         winrate_results.append(w_result)
         beat_results.append(b_result)
@@ -248,8 +253,66 @@ def run_benchmark(
     return (profit_results, winrate_results, beat_results, tardenum_results)
 
 
+# @timeit
+def run_benchmark_mp(
+    tickers, param_a, param_b, period, interval, strategy, init_balance=10000
+):
+    import multiprocessing as mp
+
+    profit_results = []
+    winrate_results = []
+    beat_results = []
+    tardenum_results = []
+
+    num_cores = int(mp.cpu_count())
+    # print("Num Cores: " + str(num_cores))
+    pool = mp.Pool(num_cores)
+
+    print("Running Benchmark for {}...".format(strategy.get_strategy_name()))
+    for idx, ticker in enumerate(tickers):
+        print(
+            f">> Testing {ticker: <8} ... {(idx)/len(tickers)*100.0:6.2f}% ({idx}/{len(tickers)})",
+            end="\r",
+        )
+        df, last_update = refresh(ticker, period, interval)
+        bnh = buy_n_hold(init_balance, df, output="None")
+
+        p_result = [[None] * len(param_b) for i in range(len(param_a))]
+        w_result = [[None] * len(param_b) for i in range(len(param_a))]
+        b_result = [[None] * len(param_b) for i in range(len(param_a))]
+        t_result = [[None] * len(param_b) for i in range(len(param_a))]
+
+        results = [[None] * len(param_b) for i in range(len(param_a))]
+        for i in range(len(param_a)):
+            for j in range(len(param_b)):
+                results[i][j] = pool.apply_async(
+                    mini_test, args=(df, strategy, param_a[i], param_b[j], init_balance)
+                )
+
+        for i in range(len(param_a)):
+            for j in range(len(param_b)):
+                test_result = results[i][j].get()
+
+                p_result[i][j] = test_result[0] - bnh
+                w_result[i][j] = test_result[1]
+                b_result[i][j] = 1 if test_result[0] - bnh > 0 else 0
+                t_result[i][j] = test_result[2]
+
+        profit_results.append(p_result)
+        winrate_results.append(w_result)
+        beat_results.append(b_result)
+        tardenum_results.append(t_result)
+
+        print(
+            " " * 80, end="\r",
+        )
+
+    return (profit_results, winrate_results, beat_results, tardenum_results)
+
+
+@timeit
 def run_strategy(tickers, param_a, param_b, period, interval, strategy, plot_fig=False):
-    (p_results, w_results, b_results, t_results) = run_benchmark(
+    (p_results, w_results, b_results, t_results) = run_benchmark_mp(
         tickers, param_a, param_b, period, interval, strategy
     )
 

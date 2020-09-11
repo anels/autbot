@@ -12,6 +12,11 @@ from pathlib import Path
 from datetime import datetime, timedelta
 from data_preparation import *
 from misc import *
+from strategy.strategy_wma import Strategy_WMA
+from strategy.strategy_macd import Strategy_MACD
+from strategy.strategy_supertrend import Strategy_SuperTrend
+from strategy.strategy_hma import Strategy_HMA
+from strategy.strategy_rvwma import Strategy_RVWMA
 
 
 def format_robinhood_trade_receipt(ticker, r_receipt):
@@ -28,15 +33,15 @@ def format_robinhood_trade_receipt(ticker, r_receipt):
 
 def get_strategy(strategy_name):
     if strategy_name == "wma":
-        from strategy import strategy_wma as strategy
+        strategy = Strategy_WMA()
     elif strategy_name == "macd":
-        from strategy import strategy_macd as strategy
+        strategy = Strategy_MACD()
     elif strategy_name == "supertrend":
-        from strategy import strategy_supertrend as strategy
+        strategy = Strategy_SuperTrend()
     elif strategy_name == "hma":
-        from strategy import strategy_hma as strategy
+        strategy = Strategy_HMA()
     elif strategy_name == "rvwma":
-        from strategy import strategy_rvwma as strategy
+        strategy = Strategy_RVWMA()
     else:
         raise Exception("Strategy not found.")
 
