@@ -323,7 +323,13 @@ def scan(account_info="accounts.yaml", config="config.yaml"):
                 )
 
             if len(hold_list) > 0:
-                hold_list_str = ", ".join(hold_list)
+                if len(hold_list) > 10:
+                    hold_list_str = (
+                        ", ".join(hold_list[:10])
+                        + f" and {len(hold_list)-10} more tickers."
+                    )
+                else:
+                    hold_list_str = ", ".join(hold_list)
                 print(f"HOLD: {hold_list_str}")
 
             elapsed_time = time.process_time() - t
