@@ -44,7 +44,7 @@ def test(init_balance, df, strategy, output="oneline", verbose=False):
 
     for i in range(0, len(df)):
         if not math.isnan(df["Buy_Signal_price"][i]):
-            purchase = math.floor(balance / df["Buy_Signal_price"][i])
+            purchase = math.floor(balance / (df["Buy_Signal_price"][i] * 0.95))
             cost = purchase * df["Buy_Signal_price"][i]
 
             holdings += purchase
