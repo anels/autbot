@@ -115,20 +115,10 @@ def scan(account_info="accounts.yaml", config="config.yaml"):
 
     if not os.path.exists(status_file):
         print("Status file does not exist!")
-
         status_list = {}
-        for ticker in ticker_list:
-            status_list[ticker] = {
-                "status": 0,
-                "balance_cash": init_balance,
-                "holding_num": 0,
-            }
-
-        with open(status_file, "w", encoding="utf8") as f:
-            json.dump(status_list, f, indent=6)
-
-    with open(status_file, "rb") as infile:
-        status_list = json.load(infile)
+    else:
+        with open(status_file, "rb") as infile:
+            status_list = json.load(infile)
 
     for ticker in ticker_list:
         if ticker not in status_list:
@@ -291,7 +281,7 @@ def scan(account_info="accounts.yaml", config="config.yaml"):
                     hold_list.append(ticker)
 
             with open(status_file, "w", encoding="utf8") as f:
-                json.dump(status_list, f, indent=6)
+                json.dump(status_list, f, indent=4)
 
             if len(trade_list) > 0:
                 header = (

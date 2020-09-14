@@ -13,6 +13,7 @@ class Strategy_MACD:
         if fast_period > slow_period:
             fast_period = slow_period
 
+        df = df.copy()
         shortEMA = df["close"].ewm(span=fast_period, adjust=False).mean()
         longEMA = df["close"].ewm(span=slow_period, adjust=False).mean()
 
