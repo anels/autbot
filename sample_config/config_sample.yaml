@@ -31,17 +31,7 @@ status_file: 'logs/status.json'
 history_file: 'logs/history.csv'
 log_file: 'logs/log.log'
 
-# watch list
-watch_list:
-  - SPY
-  - AAPL
-  - MSFT
-  - AMD
-  - INTC
-  - GOOGL
-
-
-  # ticker strategy
+# ticker strategy
 ticker_strategy:
   INTC: [supertrend, 5, 377]
   GOOGL: [rvwma, 55, 145]
