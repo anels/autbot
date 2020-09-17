@@ -147,6 +147,8 @@ def scan(account_info="accounts.yaml", config="config.yaml"):
                 playsound("resources/snoring.mp3")
             time.sleep(delta.seconds)
         else:
+            t = time.process_time()
+
             if enable_robinhood:
                 account_data = r.load_account_profile()
                 total_cash = float(account_data.get("unsettled_funds")) + float(
@@ -170,7 +172,6 @@ def scan(account_info="accounts.yaml", config="config.yaml"):
             info_str = ""
             receipt_str = ""
 
-            t = time.process_time()
             for i, ticker in enumerate(ticker_list):
                 # batch download
                 if i % 5 == 0:
@@ -325,7 +326,7 @@ def scan(account_info="accounts.yaml", config="config.yaml"):
             elapsed_time = time.process_time() - t
             print("Total Running Time: {:.2f} second.".format(elapsed_time))
 
-            time.sleep(refresh_interval)
+            time.sleep(refresh_interval - elapsed_time)
 
 
 def main(argv):

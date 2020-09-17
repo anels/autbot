@@ -266,7 +266,7 @@ def run_benchmark_mp(
 
     num_cores = int(mp.cpu_count())
     # print("Num Cores: " + str(num_cores))
-    pool = mp.Pool(num_cores)
+    pool = mp.Pool(max(num_cores - 1, 1))
 
     print("Running Benchmark for {}...".format(strategy.get_strategy_name()))
     for idx, ticker in enumerate(tickers):
