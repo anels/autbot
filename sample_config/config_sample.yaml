@@ -23,9 +23,6 @@ email_mode: notification # notification or reminder
 # real time simulation/trade
 init_balance: 1000
 
-# robinhood
-enable_robinhood: False # True or False
-
 #logs
 status_file: 'logs/status.json'
 history_file: 'logs/history.csv'

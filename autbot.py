@@ -7,7 +7,6 @@ import json
 import math
 import sys
 import pandas as pd
-import robin_stocks as r
 from pathlib import Path
 from datetime import datetime, timedelta
 from data_preparation import *
@@ -17,18 +16,6 @@ from strategy.strategy_macd import Strategy_MACD
 from strategy.strategy_supertrend import Strategy_SuperTrend
 from strategy.strategy_hma import Strategy_HMA
 from strategy.strategy_rvwma import Strategy_RVWMA
-
-
-def format_robinhood_trade_receipt(ticker, r_receipt):
-    return "{}: {} {} {} {} @ {} - {}".format(
-        r_receipt["created_at"],
-        r_receipt["type"],
-        r_receipt["side"],
-        r_receipt["quantity"],
-        ticker,
-        r_receipt["price"],
-        r_receipt["state"],
-    )
 
 
 def get_strategy(strategy_name):
@@ -56,8 +43,6 @@ def scan(account_info="accounts.yaml", config="config.yaml"):
     with open(config, "r") as file:
         config = yaml.load(file, Loader=yaml.FullLoader)
 
-    robinhood_username = accounts["robinhood_username"]
-    robinhood_password = accounts["robinhood_password"]
     email_sender_username = accounts["gmail_username"]
     email_sender_password = accounts["gmail_password"]
 
@@ -72,7 +57,6 @@ def scan(account_info="accounts.yaml", config="config.yaml"):
     email_prefix = config["email_prefix"] if "email_prefix" in config else None
     email_mode = config["email_mode"] if "email_mode" in config else "reminder"
     init_balance = config["init_balance"]
-    enable_robinhood = config["enable_robinhood"]
     strategy_name = config["strategy"]
     strategy_params = config["strategy_params"]
     ticker_strategy = config["ticker_strategy"] if "ticker_strategy" in config else None
@@ -102,16 +86,6 @@ def scan(account_info="accounts.yaml", config="config.yaml"):
 
     if enable_sound:
         from playsound import playsound
-
-    if enable_robinhood:
-        login = r.login(robinhood_username, robinhood_password, store_session=False)
-        account_data = r.load_account_profile()
-        total_cash = float(account_data.get("unsettled_funds")) + float(
-            account_data.get("cash")
-        )
-        logging.info(
-            f"Robinhood Login: {login['detail']}, the token will be expired in {login['expires_in']} seconds. Your available cash is {total_cash}"
-        )
 
     if not os.path.exists(status_file):
         print("Status file does not exist!")
@@ -148,25 +122,6 @@ def scan(account_info="accounts.yaml", config="config.yaml"):
             time.sleep(delta.seconds)
         else:
             t = time.process_time()
-
-            if enable_robinhood:
-                account_data = r.load_account_profile()
-                total_cash = float(account_data.get("unsettled_funds")) + float(
-                    account_data.get("cash")
-                )
-
-                allocated_cash = 0
-                for ticker in ticker_list:
-                    allocated_cash += status_list[ticker]["balance_cash"]
-
-                logging.info()
-
-                if total_cash < allocated_cash:
-                    logging.warning(
-                        f"Insufficient fund! Bot allocated cash: {allocated_cash}, current available cash in your robinhood account is {total_cash}."
-                    )
-                    return
-
             hold_list = []
             trade_list = []
             info_str = ""
@@ -208,28 +163,8 @@ def scan(account_info="accounts.yaml", config="config.yaml"):
                         transaction_num = math.floor(
                             status_list[ticker]["balance_cash"] * 0.95 / close_price
                         )
+
                         if transaction_num > 0:
-                            if enable_robinhood:
-                                # get user profile
-                                account_data = r.load_account_profile()
-                                cash = float(
-                                    account_data.get("unsettled_funds")
-                                ) + float(account_data.get("cash"))
-
-                                if cash > transaction_num * close_price:
-                                    r_receipt = r.order_buy_market(
-                                        ticker, transaction_num, extendedHours=True
-                                    )
-                                    close_price = float(r_receipt["price"])
-                                    receipt_ex = format_robinhood_trade_receipt(
-                                        ticker, r_receipt
-                                    )
-                                else:
-                                    logging.warning(
-                                        "Insufficient Cash! - {}".format(cash)
-                                    )
-                                    return
-
                             status_list[ticker]["holding_num"] += transaction_num
                             status_list[ticker]["balance_cash"] -= (
                                 transaction_num * close_price
@@ -242,15 +177,6 @@ def scan(account_info="accounts.yaml", config="config.yaml"):
 
                     elif sign == "sell":
                         transaction_num = status_list[ticker]["holding_num"]
-
-                        if enable_robinhood:
-                            r_receipt = r.order_sell_market(
-                                ticker, transaction_num, extendedHours=True
-                            )
-                            close_price = float(r_receipt["price"])
-                            receipt_ex = format_robinhood_trade_receipt(
-                                ticker, r_receipt
-                            )
 
                         status_list[ticker]["balance_cash"] += (
                             transaction_num * close_price
@@ -269,10 +195,6 @@ def scan(account_info="accounts.yaml", config="config.yaml"):
 
                     logging.info(transcation_record)
                     info_str += f"{transcation_record}!\n"
-
-                    if enable_robinhood:
-                        receipt_str += f"{receipt_ex}\n"
-                        logging.info(f"Robinhood Receipt: {receipt_ex}")
 
                     update_trade_history(
                         ticker, sign, transaction_num, close_price, history_file
@@ -301,13 +223,9 @@ def scan(account_info="accounts.yaml", config="config.yaml"):
                 else:
                     header += f" {info_str}!"
 
-                body_text = info_str
-                if enable_robinhood:
-                    body_text += f"\n\nRobinhood Receipt:\n{receipt_str}"
-
                 send_email(
                     header,
-                    body_text,
+                    info_str,
                     toaddr,
                     email_sender_username,
                     email_sender_password,
