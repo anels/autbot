@@ -1,6 +1,6 @@
 # AuTBot (Auto Trading Bot)
 
-This bot automatically retrieves stock data from yahoo finance and using one of the strategy to decide buy or sell. If you config your robinhood account. It can automatically place order on robinhood.
+This bot automatically retrieves stock data from yahoo finance and using one of the strategy to decide buy or sell.
 
 ## Download
 
