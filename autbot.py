@@ -51,6 +51,8 @@ def scan(account_info="accounts.yaml", config="config.yaml"):
     log_file = config["log_file"]
     refresh_interval = config["refresh"]
     data_granularity = config["interval"]
+    lookback_period = config["period"]
+
     enable_sound = config["enable_sound"] if "enable_sound" in config else False
 
     toaddr = config["email_receivers"]
@@ -129,10 +131,10 @@ def scan(account_info="accounts.yaml", config="config.yaml"):
 
             for i, ticker in enumerate(ticker_list):
                 # batch download
-                if i % 5 == 0:
-                    batch_list = ticker_list[i : i + 5]
+                if i % 10 == 0:
+                    batch_list = ticker_list[i : i + 10]
                     dfs, _ = mass_refresh(
-                        batch_list, period="10d", interval=data_granularity,
+                        batch_list, period=lookback_period, interval=data_granularity,
                     )
                 df = dfs[ticker]
                 close_price = df.iloc[-1]["close"]

@@ -1,8 +1,9 @@
 # config.yaml file
 
 # data retrieval
-refresh: 150
+refresh: 300
 interval: 5m
+period: 10d
 
 enable_sound: True
 
