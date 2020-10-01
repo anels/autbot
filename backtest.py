@@ -411,8 +411,8 @@ def plot_wma(df, signals=None, start=500):
         alpha=0.35,
         color="blue",
     )
-    plt.plot(df["wma"], label="wma", alpha=0.35)
-    plt.plot(df["ema"], label="ema", alpha=0.35)
+    plt.plot(df["fast"], label="fast", alpha=0.35)
+    plt.plot(df["slow"], label="slow", alpha=0.35)
     if signals is not None:
         add_buy_sell_signals(plt, df, signals)
 

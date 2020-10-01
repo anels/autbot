@@ -6,20 +6,23 @@ class Strategy_WMA:
     def get_strategy_name(self):
         return "wma"
 
-    def prep_data(self, df, wma_period=13, ema_period=13):
-        wma_period = int(wma_period)
-        ema_period = int(ema_period)
+    def prep_data(self, df, fast_period=13, slow_period=13):
+        fast_period = int(fast_period)
+        slow_period = int(slow_period)
+
+        if fast_period > slow_period:
+            fast_period = slow_period
 
         df = df.copy()
-        df.loc[:, "wma"] = TA.WMA(df, wma_period, "close")
-        df.loc[:, "ema"] = TA.EMA(df, ema_period, "close")
-        df["last_signal"] = self.calcLastSignal(df, max(wma_period, ema_period))
+        df.loc[:, "fast"] = TA.WMA(df, fast_period, "close")
+        df.loc[:, "slow"] = TA.WMA(df, slow_period, "close")
+        df["last_signal"] = self.calcLastSignal(df, max(fast_period, slow_period))
         return df
 
     def buy_signal_wma(self, df, i):
         if i == 0:
             return False
-        if df["wma"][i] >= df["ema"][i] and df["wma"][i - 1] > df["ema"][i - 1]:
+        if df["fast"][i] >= df["slow"][i] and df["fast"][i - 1] > df["slow"][i - 1]:
             return True
         else:
             return False
@@ -27,7 +30,7 @@ class Strategy_WMA:
     def sell_signal_wma(self, df, i):
         if i == 0:
             return False
-        if df["wma"][i] < df["ema"][i] and df["wma"][i - 1] >= df["ema"][i - 1]:
+        if df["fast"][i] < df["slow"][i] and df["fast"][i - 1] >= df["slow"][i - 1]:
             return True
         else:
             return False
