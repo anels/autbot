@@ -104,9 +104,7 @@ def scan(account_info="accounts.yaml", config="config.yaml"):
                 "holding_num": 0,
             }
 
-    for ticker in status_list.keys():
-        if ticker not in ticker_list:
-            del status_list[ticker]
+    status_list = {k: v for (k, v) in status_list.items() if k in ticker_list}
 
     while True:
         now = datetime.now()
