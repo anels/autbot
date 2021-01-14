@@ -1,5 +1,4 @@
 import numpy as np
-from finta import TA
 
 
 class Strategy_MACD:
@@ -65,4 +64,3 @@ class Strategy_MACD:
             return "sell"
         else:
             return "hold"
-

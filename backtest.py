@@ -173,7 +173,6 @@ def buy_n_hold(init_balance, df, start=500, output="oneline"):
 
 def plot_heatmap(test_result, title, x_label, y_label):
     fig, ax = plt.subplots(figsize=(9, 9))
-    im = ax.imshow(test_result, cmap="RdYlGn")
 
     # We want to show all ticks...
     ax.set_yticks(np.arange(len(x_label)))
@@ -184,18 +183,6 @@ def plot_heatmap(test_result, title, x_label, y_label):
 
     # Rotate the tick labels and set their alignment.
     plt.setp(ax.get_xticklabels(), rotation=45, ha="right", rotation_mode="anchor")
-
-    # Loop over data dimensions and create text annotations.
-    for i in range(len(x_label)):
-        for j in range(len(y_label)):
-            text = ax.text(
-                j,
-                i,
-                "{0:.2f}%".format(test_result[i][j]),
-                ha="center",
-                va="center",
-                color="w",
-            )
 
     ax.set_title(title)
     fig.tight_layout()
@@ -247,7 +234,8 @@ def run_benchmark(
         tardenum_results.append(t_result)
 
         print(
-            " " * 80, end="\r",
+            " " * 80,
+            end="\r",
         )
 
     return (profit_results, winrate_results, beat_results, tardenum_results)
@@ -304,7 +292,8 @@ def run_benchmark_mp(
         tardenum_results.append(t_result)
 
         print(
-            " " * 80, end="\r",
+            " " * 80,
+            end="\r",
         )
 
     return (profit_results, winrate_results, beat_results, tardenum_results)
@@ -325,7 +314,7 @@ def run_strategy(tickers, param_a, param_b, period, interval, strategy, plot_fig
         total_b = np.add(b_results[i], total_b)
         total_w = np.add(w_results[i], total_w)
         total_t = np.add(t_results[i], total_t)
-    avg_b = total_b * 100.0 / len(tickers)
+
     avg_w = total_w / len(tickers)
     avg_t = total_t / len(tickers)
 
@@ -338,14 +327,14 @@ def run_strategy(tickers, param_a, param_b, period, interval, strategy, plot_fig
     if len(win_coordinates[0]) == 0:
         max_result = np.max(total_p)
         max_idxes = np.unravel_index(np.argmax(total_p, axis=None), total_p.shape)
-        # print(
-        #    "The best config for {} is ({}, {}) profit margin is {}%.".format(
-        #        strategy.__name__,
-        #        param_a[max_idxes[0]],
-        #        param_b[max_idxes[1]],
-        #        max_result,
-        #    )
-        # )
+        print(
+            "The best config for {} is ({}, {}) profit margin is {}%.".format(
+                strategy.__name__,
+                param_a[max_idxes[0]],
+                param_b[max_idxes[1]],
+                max_result,
+            )
+        )
     else:
         win_idxes = list(zip(win_coordinates[0], win_coordinates[1]))
         win_picks = []
@@ -550,4 +539,3 @@ def plot_kagi(df, signals=None, start=500):
     plt.xticks(rotation=45)
     plt.ylabel("Price")
     plt.legend(loc="upper left")
-

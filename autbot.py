@@ -6,7 +6,6 @@ import yaml
 import json
 import math
 import sys
-import pandas as pd
 from pathlib import Path
 from datetime import datetime, timedelta
 from data_preparation import *
@@ -129,14 +128,15 @@ def scan(account_info="accounts.yaml", config="config.yaml"):
             hold_list = []
             trade_list = []
             info_str = ""
-            receipt_str = ""
 
             for i, ticker in enumerate(ticker_list):
                 # batch download
                 if i % 10 == 0:
                     batch_list = ticker_list[i : i + 10]
                     dfs, _ = mass_refresh(
-                        batch_list, period=lookback_period, interval=data_granularity,
+                        batch_list,
+                        period=lookback_period,
+                        interval=data_granularity,
                     )
                 df = dfs[ticker]
                 close_price = df.iloc[-1]["close"]
