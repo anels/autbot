@@ -1,3 +1,5 @@
+import logging
+
 import yfinance as yf
 
 
@@ -38,31 +40,37 @@ def mass_refresh(tickers, period="30d", interval="15m"):
     if len(tickers) == 1:
         dfs = {tickers[0]: dfs}
 
+    last_update = None
+
     for ticker in tickers:
-        df = dfs[ticker][["High", "Low", "Open", "Close", "Volume"]]
+        try:
+            df = dfs[ticker][["High", "Low", "Open", "Close", "Volume"]]
 
-        df["Time"] = df.index
-        df = df[1:]
-        df = df.dropna(subset=["High", "Low", "Open", "Close", "Volume"])
+            df["Time"] = df.index
+            df = df[1:]
+            df = df.dropna(subset=["High", "Low", "Open", "Close", "Volume"])
 
-        if df.iloc[-1]["Volume"] == 0:
-            df.drop(df.tail(1).index, inplace=True)
+            if df.iloc[-1]["Volume"] == 0:
+                df.drop(df.tail(1).index, inplace=True)
 
-        df.index = range(0, len(df))
+            df.index = range(0, len(df))
 
-        df.rename(
-            columns={
-                "High": "high",
-                "Low": "low",
-                "Open": "open",
-                "Close": "close",
-                "Volume": "volume",
-            },
-            inplace=True,
-        )
-        df_dicts[ticker] = df
-
-    last_update = df.iloc[-1]["Time"]
+            df.rename(
+                columns={
+                    "High": "high",
+                    "Low": "low",
+                    "Open": "open",
+                    "Close": "close",
+                    "Volume": "volume",
+                },
+                inplace=True,
+            )
+            df_dicts[ticker] = df
+            last_update = df.iloc[-1]["Time"]
+        except (KeyError, IndexError):
+            # A delisted or empty ticker can come back with missing columns or
+            # rows; skip it instead of failing the whole batch.
+            logging.warning("No usable data for {}, skipping.".format(ticker))
+            continue
 
     return (df_dicts, last_update)
-

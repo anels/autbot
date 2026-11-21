@@ -44,7 +44,7 @@ def test(init_balance, df, strategy, output="oneline", verbose=False):
 
     for i in range(0, len(df)):
         if not math.isnan(df["Buy_Signal_price"][i]):
-            purchase = math.floor(balance / (df["Buy_Signal_price"][i] * 0.95))
+            purchase = math.floor(balance * 0.95 / df["Buy_Signal_price"][i])
             cost = purchase * df["Buy_Signal_price"][i]
 
             holdings += purchase
@@ -173,6 +173,7 @@ def buy_n_hold(init_balance, df, start=500, output="oneline"):
 
 def plot_heatmap(test_result, title, x_label, y_label):
     fig, ax = plt.subplots(figsize=(9, 9))
+    ax.imshow(np.asarray(test_result, dtype=float), aspect="auto", cmap="viridis")
 
     # We want to show all ticks...
     ax.set_yticks(np.arange(len(x_label)))
@@ -319,7 +320,7 @@ def run_strategy(tickers, param_a, param_b, period, interval, strategy, plot_fig
     avg_t = total_t / len(tickers)
 
     win_coordinates = np.where(
-        (total_b > 0.60) & (total_t > 0)
+        (total_b / len(tickers) > 0.60) & (total_t > 0)
     )  # for multiple tickers, make sure at least 60% are beat buy and hold
 
     res = []
@@ -329,7 +330,7 @@ def run_strategy(tickers, param_a, param_b, period, interval, strategy, plot_fig
         max_idxes = np.unravel_index(np.argmax(total_p, axis=None), total_p.shape)
         print(
             "The best config for {} is ({}, {}) profit margin is {}%.".format(
-                strategy.__name__,
+                strategy.get_strategy_name(),
                 param_a[max_idxes[0]],
                 param_b[max_idxes[1]],
                 max_result,

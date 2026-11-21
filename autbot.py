@@ -108,7 +108,7 @@ def scan(account_info="accounts.yaml", config="config.yaml"):
     while True:
         now = datetime.now()
         print(now)
-        if now.weekday() > 4 and now.weekday() < 6:
+        if now.weekday() >= 5:  # Saturday or Sunday
             break
 
         if (
@@ -118,6 +118,10 @@ def scan(account_info="accounts.yaml", config="config.yaml"):
             if now.hour > 13:
                 next_wake_time += timedelta(days=1)
             next_wake_time = next_wake_time.replace(hour=6, minute=00, second=0)
+            # NOTE: when hour == 13 the computed delta is negative; timedelta
+            # normalizes it to (days=-1, seconds=86400 - elapsed), so
+            # time.sleep(delta.seconds) still lands on 06:00 the next day.
+            # Do not switch this to total_seconds(): that would break it.
             delta = next_wake_time - now
             logging.info(f"Go to sleep now, will wake up at {next_wake_time}...")
             if enable_sound:
@@ -138,6 +142,12 @@ def scan(account_info="accounts.yaml", config="config.yaml"):
                         period=lookback_period,
                         interval=data_granularity,
                     )
+                if ticker not in dfs:
+                    logging.warning(
+                        "No data returned for {}, skipping this round.".format(ticker)
+                    )
+                    hold_list.append(ticker)
+                    continue
                 df = dfs[ticker]
                 close_price = df.iloc[-1]["close"]
 
@@ -177,7 +187,11 @@ def scan(account_info="accounts.yaml", config="config.yaml"):
                             if enable_sound:
                                 playsound("resources/register.mp3")
                         else:
-                            logging.warning("Insufficient Budget! - {}".format(cash))
+                            logging.warning(
+                                "Insufficient Budget! - {}".format(
+                                    status_list[ticker]["balance_cash"]
+                                )
+                            )
 
                     elif sign == "sell":
                         transaction_num = status_list[ticker]["holding_num"]
