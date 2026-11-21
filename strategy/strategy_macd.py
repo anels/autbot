@@ -10,7 +10,8 @@ class Strategy_MACD:
         slow_period = int(slow_period)
 
         if fast_period > slow_period:
-            fast_period = slow_period
+            # Swap instead of collapsing to equal periods (a dead strategy).
+            fast_period, slow_period = slow_period, fast_period
 
         df = df.copy()
         shortEMA = df["close"].ewm(span=fast_period, adjust=False).mean()
@@ -55,9 +56,12 @@ class Strategy_MACD:
         return last_signal
 
     def sell_or_buy(self, df, i, status):
-        last_sign = (
-            "buy" if df["last_signal"][i][0] > df["last_signal"][i][1] else "sell"
-        )
+        last_buy, last_sell = df["last_signal"][i]
+        if not (last_buy > 0 or last_sell > 0):
+            # No crossover observed yet (zeros or NaN): stay flat instead of
+            # defaulting to a sell signal.
+            return "hold"
+        last_sign = "buy" if last_buy > last_sell else "sell"
         if status == 0 and last_sign == "buy":
             return "buy"
         elif status == 1 and last_sign == "sell":
