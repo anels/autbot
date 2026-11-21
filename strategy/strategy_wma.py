@@ -6,7 +6,7 @@ class Strategy_WMA:
     def get_strategy_name(self):
         return "wma"
 
-    def prep_data(self, df, fast_period=13, slow_period=13):
+    def prep_data(self, df, fast_period=13, slow_period=26):
         fast_period = int(fast_period)
         slow_period = int(slow_period)
 

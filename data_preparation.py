@@ -1,3 +1,5 @@
+import logging
+
 import yfinance as yf
 
 
@@ -68,7 +70,7 @@ def mass_refresh(tickers, period="30d", interval="15m"):
         except (KeyError, IndexError):
             # A delisted or empty ticker can come back with missing columns or
             # rows; skip it instead of failing the whole batch.
-            print("No usable data for {}, skipping.".format(ticker))
+            logging.warning("No usable data for {}, skipping.".format(ticker))
             continue
 
     return (df_dicts, last_update)
